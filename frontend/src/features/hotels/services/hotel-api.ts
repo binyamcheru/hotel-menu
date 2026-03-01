@@ -11,7 +11,7 @@ export interface Hotel {
 }
 
 export const HotelService = {
-    getHotels: async () => {
+    getHotels: async (): Promise<Hotel[]> => {
         // const response = await api.get('/hotels');
         return [
             { id: '1', name: 'Grand Plaza', slug: 'grand-plaza', address: '123 Main St', contactEmail: 'info@grandplaza.com', status: 'ACTIVE' },
@@ -20,7 +20,7 @@ export const HotelService = {
         ];
     },
 
-    getHotelBySlug: async (slug: string) => {
+    getHotelBySlug: async (slug: string): Promise<Hotel> => {
         // const response = await api.get(`/hotels/${slug}`);
         return { id: '1', name: 'Grand Plaza', slug, address: '123 Main St', contactEmail: 'info@grandplaza.com', status: 'ACTIVE' };
     },
