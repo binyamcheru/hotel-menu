@@ -78,7 +78,7 @@ export default function QRCodePage() {
                                             <button key={color} className="w-12 h-12 rounded-2xl border-4 border-white shadow-md ring-1 ring-gray-100" style={{ backgroundColor: color }}></button>
                                         ))}
                                         <button className="w-12 h-12 rounded-2xl bg-gray-50 border-2 border-dashed border-gray-200 flex items-center justify-center text-gray-400">
-                                            < प्लस className="w-5 h-5" />
+                                            <Plus className="w-5 h-5" />
                                         </button>
                                     </div>
                                 </div>
