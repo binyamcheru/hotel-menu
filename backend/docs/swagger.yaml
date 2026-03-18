@@ -1,0 +1,2214 @@
+basePath: /api
+definitions:
+  domain.AddMenuItemIngredientRequest:
+    properties:
+      ingredient_id:
+        type: string
+      menu_item_id:
+        type: string
+    required:
+    - ingredient_id
+    - menu_item_id
+    type: object
+  domain.Category:
+    properties:
+      category_id:
+        type: string
+      created_at:
+        type: string
+      hotel_id:
+        type: string
+      is_active:
+        type: boolean
+      name_am:
+        type: string
+      name_en:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  domain.Chef:
+    properties:
+      bio_am:
+        type: string
+      bio_en:
+        type: string
+      chef_id:
+        type: string
+      created_at:
+        type: string
+      hotel_id:
+        type: string
+      image_url:
+        type: string
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  domain.CreateCategoryRequest:
+    properties:
+      hotel_id:
+        type: string
+      is_active:
+        type: boolean
+      name_am:
+        type: string
+      name_en:
+        type: string
+    required:
+    - hotel_id
+    - name_en
+    type: object
+  domain.CreateChefRequest:
+    properties:
+      bio_am:
+        type: string
+      bio_en:
+        type: string
+      hotel_id:
+        type: string
+      image_url:
+        type: string
+      name:
+        type: string
+    required:
+    - hotel_id
+    - name
+    type: object
+  domain.CreateDiscountRequest:
+    properties:
+      end_date:
+        type: string
+      hotel_id:
+        type: string
+      is_active:
+        type: boolean
+      menu_item_id:
+        type: string
+      percentage:
+        maximum: 100
+        type: number
+      start_date:
+        type: string
+    required:
+    - end_date
+    - hotel_id
+    - menu_item_id
+    - percentage
+    - start_date
+    type: object
+  domain.CreateFeedbackRequest:
+    properties:
+      category:
+        type: string
+      hotel_id:
+        type: string
+      menu_item_id:
+        type: string
+      message:
+        type: string
+    required:
+    - hotel_id
+    - message
+    type: object
+  domain.CreateHotelRequest:
+    properties:
+      address:
+        type: string
+      language_settings:
+        type: string
+      logo:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+    required:
+    - name
+    type: object
+  domain.CreateIngredientRequest:
+    properties:
+      hotel_id:
+        type: string
+      is_allergen:
+        type: boolean
+      name:
+        type: string
+    required:
+    - hotel_id
+    - name
+    type: object
+  domain.CreateMenuItemRequest:
+    properties:
+      category_id:
+        type: string
+      chef_id:
+        type: string
+      description_am:
+        type: string
+      description_en:
+        type: string
+      hotel_id:
+        type: string
+      image_url:
+        type: string
+      is_available:
+        type: boolean
+      is_special:
+        type: boolean
+      name_am:
+        type: string
+      name_en:
+        type: string
+      price:
+        type: number
+      video_url:
+        type: string
+    required:
+    - category_id
+    - hotel_id
+    - name_en
+    - price
+    type: object
+  domain.CreateRatingRequest:
+    properties:
+      comment:
+        type: string
+      hotel_id:
+        type: string
+      language:
+        type: string
+      menu_item_id:
+        type: string
+      rating:
+        maximum: 5
+        minimum: 1
+        type: integer
+    required:
+    - hotel_id
+    - menu_item_id
+    - rating
+    type: object
+  domain.CreateUserRequest:
+    properties:
+      email:
+        type: string
+      hotel_id:
+        type: string
+      password:
+        minLength: 6
+        type: string
+      phone_no:
+        type: string
+      role:
+        enum:
+        - superadmin
+        - admin
+        type: string
+    required:
+    - hotel_id
+    - password
+    - phone_no
+    - role
+    type: object
+  domain.Discount:
+    properties:
+      created_at:
+        type: string
+      discount_id:
+        type: string
+      end_date:
+        type: string
+      hotel_id:
+        type: string
+      is_active:
+        type: boolean
+      menu_item_id:
+        type: string
+      percentage:
+        type: number
+      start_date:
+        type: string
+    type: object
+  domain.Feedback:
+    properties:
+      category:
+        type: string
+      created_at:
+        type: string
+      feedback_id:
+        type: string
+      hotel_id:
+        type: string
+      menu_item_id:
+        type: string
+      message:
+        type: string
+    type: object
+  domain.Hotel:
+    properties:
+      address:
+        type: string
+      created_at:
+        type: string
+      hotel_id:
+        type: string
+      language_settings:
+        type: string
+      logo:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  domain.Ingredient:
+    properties:
+      created_at:
+        type: string
+      hotel_id:
+        type: string
+      ingredient_id:
+        type: string
+      is_allergen:
+        type: boolean
+      name:
+        type: string
+    type: object
+  domain.LoginRequest:
+    properties:
+      password:
+        type: string
+      phone_no:
+        type: string
+    required:
+    - password
+    - phone_no
+    type: object
+  domain.LoginResponse:
+    properties:
+      refresh_token:
+        type: string
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/domain.User'
+    type: object
+  domain.MenuItem:
+    properties:
+      category_id:
+        type: string
+      chef_id:
+        type: string
+      created_at:
+        type: string
+      description_am:
+        type: string
+      description_en:
+        type: string
+      hotel_id:
+        type: string
+      image_url:
+        type: string
+      is_available:
+        type: boolean
+      is_special:
+        type: boolean
+      menu_item_id:
+        type: string
+      name_am:
+        type: string
+      name_en:
+        type: string
+      price:
+        type: number
+      slug:
+        type: string
+      updated_at:
+        type: string
+      video_url:
+        type: string
+      view_count:
+        type: integer
+    type: object
+  domain.Rating:
+    properties:
+      comment:
+        type: string
+      created_at:
+        type: string
+      hotel_id:
+        type: string
+      language:
+        type: string
+      menu_item_id:
+        type: string
+      rating:
+        type: integer
+      rating_id:
+        type: string
+    type: object
+  domain.RefreshRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  domain.TokenPair:
+    properties:
+      refresh_token:
+        type: string
+      token:
+        type: string
+    type: object
+  domain.UpdateCategoryRequest:
+    properties:
+      is_active:
+        type: boolean
+      name_am:
+        type: string
+      name_en:
+        type: string
+    type: object
+  domain.UpdateChefRequest:
+    properties:
+      bio_am:
+        type: string
+      bio_en:
+        type: string
+      image_url:
+        type: string
+      name:
+        type: string
+    type: object
+  domain.UpdateDiscountRequest:
+    properties:
+      end_date:
+        type: string
+      is_active:
+        type: boolean
+      percentage:
+        type: number
+      start_date:
+        type: string
+    type: object
+  domain.UpdateHotelRequest:
+    properties:
+      address:
+        type: string
+      language_settings:
+        type: string
+      logo:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+    type: object
+  domain.UpdateMenuItemRequest:
+    properties:
+      category_id:
+        type: string
+      chef_id:
+        type: string
+      description_am:
+        type: string
+      description_en:
+        type: string
+      image_url:
+        type: string
+      is_available:
+        type: boolean
+      is_special:
+        type: boolean
+      name_am:
+        type: string
+      name_en:
+        type: string
+      price:
+        type: number
+      video_url:
+        type: string
+    type: object
+  domain.UpdateUserRequest:
+    properties:
+      email:
+        type: string
+      is_active:
+        type: boolean
+      password:
+        type: string
+      phone_no:
+        type: string
+      role:
+        type: string
+    type: object
+  domain.User:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      hotel_id:
+        type: string
+      is_active:
+        type: boolean
+      phone_no:
+        type: string
+      role:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
+  utils.Response:
+    properties:
+      data: {}
+      message:
+        type: string
+      status:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: A comprehensive API for hotel menu management, including hotels, categories,
+    menu items, chefs, ratings, discounts, analytics, and feedback.
+  title: Hotel Menu API
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate a user with phone number and password, returns access
+        and refresh tokens
+      parameters:
+      - description: Login credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.LoginResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Login user
+      tags:
+      - Auth
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Exchange a valid refresh token for a new access/refresh token pair
+      parameters:
+      - description: Refresh token
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.RefreshRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.TokenPair'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Refresh access token
+      tags:
+      - Auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new admin or superadmin user
+      parameters:
+      - description: User registration data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.User'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Register user
+      tags:
+      - Auth
+  /categories:
+    post:
+      consumes:
+      - application/json
+      description: Create a new menu category (admin/superadmin only)
+      parameters:
+      - description: Category data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CreateCategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Category'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Create category
+      tags:
+      - Categories
+  /categories/{id}:
+    delete:
+      description: Delete a category (admin/superadmin only)
+      parameters:
+      - description: Category ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete category
+      tags:
+      - Categories
+    get:
+      description: Get a category's details by its UUID
+      parameters:
+      - description: Category ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Category'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Get category by ID
+      tags:
+      - Categories
+    put:
+      consumes:
+      - application/json
+      description: Update a category's details (admin/superadmin only)
+      parameters:
+      - description: Category ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Category update data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UpdateCategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Category'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Update category
+      tags:
+      - Categories
+  /chefs:
+    post:
+      consumes:
+      - application/json
+      description: Create a new chef profile (admin/superadmin only)
+      parameters:
+      - description: Chef data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CreateChefRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Chef'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Create chef
+      tags:
+      - Chefs
+  /chefs/{id}:
+    delete:
+      description: Delete a chef profile (admin/superadmin only)
+      parameters:
+      - description: Chef ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete chef
+      tags:
+      - Chefs
+    get:
+      description: Get a chef's details by their UUID (admin/superadmin only)
+      parameters:
+      - description: Chef ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Chef'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Get chef by ID
+      tags:
+      - Chefs
+    put:
+      consumes:
+      - application/json
+      description: Update a chef's details (admin/superadmin only)
+      parameters:
+      - description: Chef ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Chef update data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UpdateChefRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Chef'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Update chef
+      tags:
+      - Chefs
+  /discounts:
+    post:
+      consumes:
+      - application/json
+      description: Create a new discount for a menu item (admin/superadmin only)
+      parameters:
+      - description: Discount data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CreateDiscountRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Discount'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Create discount
+      tags:
+      - Discounts
+  /discounts/{id}:
+    delete:
+      description: Delete a discount (admin/superadmin only)
+      parameters:
+      - description: Discount ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete discount
+      tags:
+      - Discounts
+    get:
+      description: Get a discount's details by its UUID
+      parameters:
+      - description: Discount ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Discount'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Get discount by ID
+      tags:
+      - Discounts
+    put:
+      consumes:
+      - application/json
+      description: Update a discount's details (admin/superadmin only)
+      parameters:
+      - description: Discount ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Discount update data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UpdateDiscountRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Discount'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Update discount
+      tags:
+      - Discounts
+  /feedback/{id}:
+    delete:
+      parameters:
+      - description: Feedback ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete feedback
+      tags:
+      - Feedback
+  /hotels:
+    get:
+      description: Get all hotels (admin/superadmin only)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.Hotel'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: List all hotels
+      tags:
+      - Hotels
+    post:
+      consumes:
+      - application/json
+      description: Create a new hotel (superadmin only)
+      parameters:
+      - description: Hotel data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CreateHotelRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Hotel'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Create hotel
+      tags:
+      - Hotels
+  /hotels/{id}:
+    delete:
+      description: Delete a hotel (superadmin only)
+      parameters:
+      - description: Hotel ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete hotel
+      tags:
+      - Hotels
+    put:
+      consumes:
+      - application/json
+      description: Update a hotel's details (admin/superadmin only)
+      parameters:
+      - description: Hotel ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Hotel update data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UpdateHotelRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Hotel'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Update hotel
+      tags:
+      - Hotels
+  /hotels/{id}/analytics:
+    get:
+      parameters:
+      - description: Hotel ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Get analytics summary
+      tags:
+      - Analytics
+  /hotels/{id}/chefs:
+    get:
+      description: Get all chefs for a specific hotel (admin/superadmin only)
+      parameters:
+      - description: Hotel ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.Chef'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: List chefs by hotel
+      tags:
+      - Chefs
+  /hotels/{id}/discounts:
+    get:
+      description: Get all discounts for a specific hotel (admin/superadmin only)
+      parameters:
+      - description: Hotel ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.Discount'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: List discounts by hotel
+      tags:
+      - Discounts
+  /hotels/{id}/feedback:
+    get:
+      parameters:
+      - description: Hotel ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.Feedback'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: List feedback by hotel
+      tags:
+      - Feedback
+  /hotels/{id}/ingredients:
+    get:
+      description: Get all ingredients for a specific hotel (admin/superadmin only)
+      parameters:
+      - description: Hotel ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.Ingredient'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: List ingredients by hotel
+      tags:
+      - Ingredients
+  /hotels/{id}/users:
+    get:
+      parameters:
+      - description: Hotel ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.User'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: List users by hotel
+      tags:
+      - Users
+  /ingredients:
+    post:
+      consumes:
+      - application/json
+      description: Create a new ingredient (admin/superadmin only)
+      parameters:
+      - description: Ingredient data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CreateIngredientRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Ingredient'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Create ingredient
+      tags:
+      - Ingredients
+  /ingredients/{id}:
+    delete:
+      description: Delete an ingredient (admin/superadmin only)
+      parameters:
+      - description: Ingredient ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete ingredient
+      tags:
+      - Ingredients
+  /me:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.User'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Get current user
+      tags:
+      - Users
+  /menu-items:
+    post:
+      consumes:
+      - application/json
+      description: Create a new menu item (admin/superadmin only)
+      parameters:
+      - description: Menu item data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CreateMenuItemRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.MenuItem'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Create menu item
+      tags:
+      - Menu Items
+  /menu-items/{id}:
+    delete:
+      description: Delete a menu item (admin/superadmin only)
+      parameters:
+      - description: Menu Item ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete menu item
+      tags:
+      - Menu Items
+    get:
+      description: Get a menu item's details by its UUID
+      parameters:
+      - description: Menu Item ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.MenuItem'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Get menu item by ID
+      tags:
+      - Menu Items
+    put:
+      consumes:
+      - application/json
+      description: Update a menu item's details (admin/superadmin only)
+      parameters:
+      - description: Menu Item ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Menu item update data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UpdateMenuItemRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.MenuItem'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Update menu item
+      tags:
+      - Menu Items
+  /menu-items/{id}/ingredients/{ingredient_id}:
+    delete:
+      description: Unlink an ingredient from a menu item (admin/superadmin only)
+      parameters:
+      - description: Menu Item ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Ingredient ID (UUID)
+        in: path
+        name: ingredient_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Remove ingredient from menu item
+      tags:
+      - Ingredients
+  /menu-items/ingredients:
+    post:
+      consumes:
+      - application/json
+      description: Link an ingredient to a menu item (admin/superadmin only)
+      parameters:
+      - description: Menu item and ingredient IDs
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.AddMenuItemIngredientRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Add ingredient to menu item
+      tags:
+      - Ingredients
+  /menu/categories/{id}/menu-items:
+    get:
+      description: Get all menu items for a specific category
+      parameters:
+      - description: Category ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.MenuItem'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: List menu items by category
+      tags:
+      - Menu
+  /menu/feedback:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Feedback data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CreateFeedbackRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Feedback'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Submit feedback
+      tags:
+      - Menu
+  /menu/hotels/{id}:
+    get:
+      description: Get a hotel's details by its UUID
+      parameters:
+      - description: Hotel ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Hotel'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Get hotel by ID
+      tags:
+      - Menu
+  /menu/hotels/{id}/categories:
+    get:
+      description: Get all categories for a specific hotel
+      parameters:
+      - description: Hotel ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.Category'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: List categories by hotel
+      tags:
+      - Menu
+  /menu/hotels/{id}/menu-items:
+    get:
+      description: Get all menu items for a specific hotel
+      parameters:
+      - description: Hotel ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.MenuItem'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: List menu items by hotel
+      tags:
+      - Menu
+  /menu/hotels/{id}/menu-items/{menu_item_id}/view:
+    post:
+      parameters:
+      - description: Hotel ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Menu Item ID
+        in: path
+        name: menu_item_id
+        required: true
+        type: string
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Record menu item view
+      tags:
+      - Menu
+  /menu/hotels/{id}/scan:
+    post:
+      parameters:
+      - description: Hotel ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Record hotel QR scan
+      tags:
+      - Menu
+  /menu/menu-items/{id}/average-rating:
+    get:
+      description: Get the average rating and total count for a menu item
+      parameters:
+      - description: Menu Item ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Get average rating
+      tags:
+      - Menu
+  /menu/menu-items/{id}/ingredients:
+    get:
+      description: Get all ingredients for a specific menu item
+      parameters:
+      - description: Menu Item ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.Ingredient'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: List ingredients for menu item
+      tags:
+      - Menu
+  /menu/menu-items/{id}/ratings:
+    get:
+      description: Get all ratings for a specific menu item
+      parameters:
+      - description: Menu Item ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.Rating'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: List ratings for menu item
+      tags:
+      - Menu
+  /menu/menu-items/slug/{slug}:
+    get:
+      description: Get a menu item's details by its URL-friendly slug
+      parameters:
+      - description: Menu item slug
+        in: path
+        name: slug
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.MenuItem'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Get menu item by slug
+      tags:
+      - Menu
+  /menu/ratings:
+    post:
+      consumes:
+      - application/json
+      description: Submit a rating for a menu item
+      parameters:
+      - description: Rating data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CreateRatingRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Rating'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Create rating
+      tags:
+      - Menu
+  /ratings/{id}:
+    delete:
+      description: Delete a rating (admin/superadmin only)
+      parameters:
+      - description: Rating ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete rating
+      tags:
+      - Ratings
+  /users/{id}:
+    delete:
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete user
+      tags:
+      - Users
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: User data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.User'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Update user
+      tags:
+      - Users
+securityDefinitions:
+  BearerAuth:
+    description: 'Enter your bearer token in the format: Bearer {token}'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
