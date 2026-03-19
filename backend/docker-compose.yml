@@ -1,20 +1,4 @@
 services:
-  postgres: 
-    image: postgres:16-alpine
-    container_name: hotelmenu_postgres
-    restart: always
-    env_file:
-      - .env
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
   redis:
     image: redis:7-alpine
     container_name: hotelmenu_redis
@@ -32,11 +16,10 @@ services:
   migrate:
     image: migrate/migrate
     container_name: hotelmenu_migrate
-    depends_on:
-      postgres:
-        condition: service_healthy
     volumes:
       - ./migrations:/migrations
+    env_file:
+      - .env
     command: [
       "-path", "/migrations",
       "-database", "${DATABASE_URL}",
@@ -50,14 +33,8 @@ services:
     env_file:
       - .env 
     depends_on:
-      postgres:
-        condition: service_healthy
       redis:
         condition: service_healthy
-
-    # volumes:
-    #   - .:/app
-          
     ports:
       - "8080:8080"
     restart: always
@@ -65,17 +42,10 @@ services:
   seed: 
     build: 
       context: .
-      # dockerfile: Dockerfile.seed
-    # container_name: hotelmenu_seed
     command: ./seed
     env_file: 
       - .env
-    depends_on: 
-      postgres:
-        condition: service_healthy
-    restart: "no" # seeds usually run once
-    
+    restart: "no"
 
 volumes:
-  postgres_data:
   redis_data:
