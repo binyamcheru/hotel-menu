@@ -14,7 +14,6 @@ ON CONFLICT (hotel_id) DO NOTHING;
 
 INSERT INTO users (user_id, hotel_id, phone_no, email, password, role, is_active)
 VALUES
-    ('00000000-0000-4000-b000-000000000001', '00000000-0000-4000-a000-000000000001', '0911223344', 'superadmin@hotelmenu.com', '$2a$10$vI8qZz.SQ8nL8R.qI9T.f.UuJu.S.8.e.J.e.f.B.e.f.E.e.f', 'superadmin', true),
     ('00000000-0000-4000-b000-000000000002', '00000000-0000-4000-a000-000000000002', '0911000002', 'admin@grandaddis.com', '$2a$10$vI8qZz.SQ8nL8R.qI9T.f.UuJu.S.8.e.J.e.f.B.e.f.E.e.f', 'admin', true)
 ON CONFLICT (user_id) DO NOTHING;
 

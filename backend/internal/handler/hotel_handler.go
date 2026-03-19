@@ -1,9 +1,13 @@
 package handler
 
 import (
+	"fmt"
+	"log"
 	"backend/internal/domain"
 	"backend/internal/service"
 	"backend/internal/utils"
+	"backend/internal/config"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -11,10 +15,14 @@ import (
 
 type HotelHandler struct {
 	hotelService *service.HotelService
+	cfg          *config.Config
 }
 
-func NewHotelHandler(hotelService *service.HotelService) *HotelHandler {
-	return &HotelHandler{hotelService: hotelService}
+func NewHotelHandler(hotelService *service.HotelService, cfg *config.Config) *HotelHandler {
+	return &HotelHandler{
+		hotelService: hotelService,
+		cfg:          cfg,
+	}
 }
 
 // Create godoc
@@ -143,4 +151,40 @@ func (h *HotelHandler) Delete(c *gin.Context) {
 		return
 	}
 	utils.OKResponse(c, "Hotel deleted", nil)
+}
+
+// QRCode godoc
+// @Summary      Generate hotel QR code
+// @Description  Generate a QR code for the hotel menu
+// @Tags         Hotels
+// @Produce      png
+// @Param        id   path      string  true  "Hotel ID (UUID)"
+// @Success      200  {string}  string  "QR code PNG"
+// @Failure      400  {object}  utils.Response
+// @Failure      500  {object}  utils.Response
+// @Router       /hotels/{id}/qrcode [get]
+func (h *HotelHandler) QRCode(c *gin.Context) {
+	hotelID, err := uuid.Parse(c.Param("id"))
+	log.Println("QR CODE HIT")
+	if err != nil {
+		utils.BadRequestResponse(c, "Invalid hotel ID")
+		return
+	}
+
+	// Verify hotel exists
+	_, err = h.hotelService.GetByID(c.Request.Context(), hotelID)
+	if err != nil {
+		utils.NotFoundResponse(c, "Hotel not found")
+		return
+	}
+
+	url := fmt.Sprintf("%s/menu/%s", h.cfg.FrontendURL, hotelID.String())
+
+	png, err := utils.GenerateQRCode(url, 256)
+	if err != nil {
+		utils.InternalErrorResponse(c, "QR code generation failed")
+		return
+	}
+
+	c.Data(http.StatusOK, "image/png", png)
 }

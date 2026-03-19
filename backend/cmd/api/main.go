@@ -76,7 +76,7 @@ func main() {
 
 	// 6. Initialize handlers
 	authHandler := handler.NewAuthHandler(authService)
-	hotelHandler := handler.NewHotelHandler(hotelService)
+	hotelHandler := handler.NewHotelHandler(hotelService, cfg)
 	userHandler := handler.NewUserHandler(userService)
 	categoryHandler := handler.NewCategoryHandler(categoryService)
 	chefHandler := handler.NewChefHandler(chefService)
@@ -114,6 +114,7 @@ func main() {
 		menu.Use(middleware.CacheMiddleware(rdb, 5*time.Minute))
 		{
 			menu.GET("/hotels/:id", hotelHandler.GetByID)
+			menu.GET("/hotels/:id/qrcode", hotelHandler.QRCode)
 			menu.GET("/hotels/:id/categories", categoryHandler.GetByHotelID)
 			menu.GET("/hotels/:id/menu-items", menuItemHandler.GetByHotelID)
 			menu.GET("/categories/:id/menu-items", menuItemHandler.GetByCategoryID)

@@ -18,6 +18,7 @@ type Config struct {
 	DBName     string
 	JWTSecret  string
 	Port       string
+	FrontendURL string
 
 	// Redis
 	RedisHost     string
@@ -46,6 +47,7 @@ func Load() *Config {
 		DBName:     getEnv("DB_NAME", "hotelmenu"),
 		JWTSecret:  getEnv("JWT_SECRET", "super_secret"),
 		Port:       getEnv("PORT", "8080"),
+		FrontendURL: getEnv("FRONTEND_URL", "http://localhost:3000"),
 
 		// Redis
 		RedisHost:     getEnv("REDIS_HOST", "localhost"),
