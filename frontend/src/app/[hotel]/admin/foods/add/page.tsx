@@ -14,11 +14,10 @@ const foodSchema = z.object({
     name: z.string().min(3, 'Dish name must be at least 3 characters'),
     description: z.string().min(10, 'Description must be at least 10 characters'),
     price: z.number().min(0.01, 'Price must be greater than 0'),
-    category: z.string().min(1, 'Category is required'),
-    image: z.string().url('Invalid image URL').or(z.string().length(0)),
-    available: z.boolean(),
-    isPopular: z.boolean(),
-    calories: z.string().optional(),
+    category_id: z.string().min(1, 'Category is required'),
+    image_url: z.string().url('Invalid image URL').or(z.string().length(0)),
+    is_available: z.boolean(),
+    is_special: z.boolean(),
 });
 
 type FoodFormValues = z.infer<typeof foodSchema>;
@@ -31,7 +30,7 @@ export default function AddFoodPage() {
 
     const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FoodFormValues>({
         resolver: zodResolver(foodSchema),
-        defaultValues: { available: true, isPopular: false, price: 0 },
+        defaultValues: { is_available: true, is_special: false, price: 0 },
     });
 
     useEffect(() => {
@@ -45,7 +44,12 @@ export default function AddFoodPage() {
 
     const onSubmit = async (data: FoodFormValues) => {
         try {
-            await FoodService.addFoodItem({ ...data, hotelSlug: hotel });
+            await FoodService.addFoodItem(hotel, {
+                ...data,
+                name: { en: data.name, am: '' }, // Defaulting Amharic to empty for now
+                description: { en: data.description, am: '' },
+                image_url: data.image_url || ''
+            });
             router.push(`/${hotel}/admin/foods`);
         } catch (error) {
             console.error('Failed to add food item:', error);
@@ -53,7 +57,7 @@ export default function AddFoodPage() {
     };
 
     return (
-        <ProtectedRoute allowedRoles={['HOTEL_ADMIN']} requireHotelMatch={true}>
+        <ProtectedRoute allowedRoles={['admin']} requireHotelMatch={true}>
             <div className="max-w-4xl mx-auto space-y-8 p-8">
                 <Link href={`/${hotel}/admin/foods`} className="inline-flex items-center gap-2 text-sm font-bold text-gray-400 hover:text-indigo-600 transition-colors">
                     <ArrowLeft className="w-4 h-4" />
@@ -71,7 +75,7 @@ export default function AddFoodPage() {
                             <div className="space-y-2 md:col-span-2">
                                 <label className="text-sm font-black text-gray-700 uppercase tracking-widest flex items-center gap-2">
                                     <Utensils className="w-4 h-4 text-indigo-400" />
-                                    Dish Name
+                                    Dish Name (English)
                                 </label>
                                 <input
                                     {...register('name')}
@@ -83,7 +87,7 @@ export default function AddFoodPage() {
 
                             <div className="space-y-4 md:col-span-2">
                                 <label className="text-sm font-black text-gray-700 uppercase tracking-widest flex items-center gap-2">
-                                    Description
+                                    Description (English)
                                 </label>
                                 <textarea
                                     {...register('description')}
@@ -100,19 +104,19 @@ export default function AddFoodPage() {
                                     Category
                                 </label>
                                 <select
-                                    {...register('category')}
+                                    {...register('category_id')}
                                     className="w-full px-6 py-4 bg-gray-50 border-none rounded-[20px] focus:ring-2 focus:ring-indigo-500 transition-all font-bold appearance-none"
                                 >
                                     <option value="">Select Category</option>
-                                    {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                                    {categories.map(c => <option key={c.id} value={c.id}>{c.name.en}</option>)}
                                 </select>
-                                {errors.category && <p className="text-xs text-red-500 font-bold ml-2">{errors.category.message}</p>}
+                                {errors.category_id && <p className="text-xs text-red-500 font-bold ml-2">{errors.category_id.message}</p>}
                             </div>
 
                             <div className="space-y-2">
                                 <label className="text-sm font-black text-gray-700 uppercase tracking-widest flex items-center gap-2">
                                     <DollarSign className="w-4 h-4 text-indigo-400" />
-                                    Price (USD)
+                                    Price
                                 </label>
                                 <input
                                     type="number"
@@ -130,11 +134,11 @@ export default function AddFoodPage() {
                                     Image URL
                                 </label>
                                 <input
-                                    {...register('image')}
+                                    {...register('image_url')}
                                     placeholder="https://images.unsplash.com/..."
                                     className="w-full px-6 py-4 bg-gray-50 border-none rounded-[20px] focus:ring-2 focus:ring-indigo-500 transition-all font-medium"
                                 />
-                                {errors.image && <p className="text-xs text-red-500 font-bold ml-2">{errors.image.message}</p>}
+                                {errors.image_url && <p className="text-xs text-red-500 font-bold ml-2">{errors.image_url.message}</p>}
                             </div>
 
                             <div className="flex gap-4 md:col-span-2">
@@ -148,7 +152,7 @@ export default function AddFoodPage() {
                                             <p className="text-[10px] text-gray-400 font-bold uppercase mt-1">In Stock</p>
                                         </div>
                                     </div>
-                                    <input type="checkbox" {...register('available')} className="w-6 h-6 rounded-lg border-gray-100 text-indigo-600 focus:ring-indigo-500" />
+                                    <input type="checkbox" {...register('is_available')} className="w-6 h-6 rounded-lg border-gray-100 text-indigo-600 focus:ring-indigo-500" />
                                 </label>
 
                                 <label className="flex-1 flex items-center justify-between p-5 bg-gray-50 rounded-[24px] border-2 border-transparent has-[:checked]:border-amber-600 has-[:checked]:bg-amber-50 transition-all cursor-pointer group">
@@ -157,11 +161,11 @@ export default function AddFoodPage() {
                                             <Star className="w-6 h-6" />
                                         </div>
                                         <div>
-                                            <p className="font-black text-gray-900 leading-none">Popular</p>
+                                            <p className="font-black text-gray-900 leading-none">Special</p>
                                             <p className="text-[10px] text-gray-400 font-bold uppercase mt-1">Featured</p>
                                         </div>
                                     </div>
-                                    <input type="checkbox" {...register('isPopular')} className="w-6 h-6 rounded-lg border-gray-100 text-amber-600 focus:ring-amber-500" />
+                                    <input type="checkbox" {...register('is_special')} className="w-6 h-6 rounded-lg border-gray-100 text-amber-600 focus:ring-amber-500" />
                                 </label>
                             </div>
                         </div>

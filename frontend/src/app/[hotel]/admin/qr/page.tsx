@@ -1,19 +1,47 @@
-'use client';
-
+import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { Scan, Download, Palette, Type, Share2, RefreshCw } from 'lucide-react';
+import { Scan, Download, Palette, Type, Share2, RefreshCw, Loader2 } from 'lucide-react';
 import { ProtectedRoute } from '@/features/auth/components/protected-route';
+import { getHotelById } from '@/lib/managerApi';
+import { fetchSafe } from '@/lib/api';
 
 export default function QRCodePage() {
     const { hotel } = useParams() as { hotel: string };
+    const [hotelData, setHotelData] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+
     const menuUrl = typeof window !== 'undefined' ? `${window.location.origin}/${hotel}/menu` : `/${hotel}/menu`;
 
+    useEffect(() => {
+        const fetchHotel = async () => {
+            try {
+                const res = await fetchSafe(() => getHotelById(hotel));
+                setHotelData(res.data);
+            } catch (err) {
+                console.error('Failed to fetch hotel:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        if (hotel) fetchHotel();
+    }, [hotel]);
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center h-[60vh]">
+                <Loader2 className="w-10 h-10 animate-spin text-indigo-600" />
+            </div>
+        );
+    }
+
     return (
-        <ProtectedRoute allowedRoles={['HOTEL_ADMIN']} requireHotelMatch={true}>
+        <ProtectedRoute allowedRoles={['admin']} requireHotelMatch={true}>
             <div className="max-w-6xl mx-auto p-8 space-y-10">
                 <div className="flex justify-between items-center">
                     <div>
-                        <h1 className="text-3xl font-black text-gray-900 tracking-tight">QR Code Generator</h1>
+                        <h1 className="text-3xl font-black text-gray-900 tracking-tight">
+                            {hotelData?.name || 'Menu'} <span className="text-indigo-600 opacity-20">/</span> QR Code
+                        </h1>
                         <p className="text-gray-500">Customize and download your digital menu QR code.</p>
                     </div>
                     <button className="flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-2xl font-bold hover:bg-indigo-700 transition-all shadow-lg active:scale-95">
@@ -28,7 +56,7 @@ export default function QRCodePage() {
                         <div className="bg-white p-10 rounded-[48px] border border-gray-100 shadow-2xl flex flex-col items-center gap-8 relative overflow-hidden group">
                             <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-600 to-purple-600"></div>
                             <div className="text-center">
-                                <h3 className="text-2xl font-black text-gray-900 capitalize leading-none mb-2">{hotel.replace('-', ' ')}</h3>
+                                <h3 className="text-2xl font-black text-gray-900 capitalize leading-none mb-2">{hotelData?.name || hotel.replace('-', ' ')}</h3>
                                 <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Digital Menu</p>
                             </div>
 
