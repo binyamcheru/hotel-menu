@@ -1,7 +1,8 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { AuthState, AuthContextType, User, UserRole } from '@/types/auth';
+import { AuthState, AuthContextType } from '@/types/auth';
+import { AuthService } from '@/features/auth/services/auth.service';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -13,11 +14,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     useEffect(() => {
-        // Check for stored user on mount
-        const storedUser = localStorage.getItem('auth_user');
-        if (storedUser) {
+        const user = AuthService.getCurrentUser();
+        const token = localStorage.getItem('token');
+
+        if (user && token) {
             setState({
-                user: JSON.parse(storedUser),
+                user,
                 isAuthenticated: true,
                 isLoading: false,
             });
@@ -26,30 +28,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     }, []);
 
-    const login = async (role: UserRole, hotelSlug?: string) => {
+    const login = async (credentials: any) => {
         setState((prev) => ({ ...prev, isLoading: true }));
-
-        // Mock login delay
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        const mockUser: User = {
-            id: Math.random().toString(36).substring(7),
-            email: `${role.toLowerCase()}@example.com`,
-            name: `${role.replace('_', ' ')} Mock User`,
-            role,
-            hotelSlug,
-        };
-
-        localStorage.setItem('auth_user', JSON.stringify(mockUser));
-        setState({
-            user: mockUser,
-            isAuthenticated: true,
-            isLoading: false,
-        });
+        try {
+            const data = await AuthService.login(credentials);
+            console.log('AuthService.login response:', data);
+            setState({
+                user: data.user,
+                isAuthenticated: true,
+                isLoading: false,
+            });
+            return data.user;
+        } catch (error) {
+            console.error('AuthService.login error:', error);
+            setState((prev) => ({ ...prev, isLoading: false }));
+            throw error;
+        }
     };
 
     const logout = () => {
-        localStorage.removeItem('auth_user');
+        AuthService.logout();
         setState({
             user: null,
             isAuthenticated: false,
