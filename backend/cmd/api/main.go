@@ -127,6 +127,7 @@ func main() {
 			menu.POST("/hotels/:id/menu-items/:menu_item_id/view", analyticsHandler.RecordMenuView)
 			menu.POST("/feedback", feedbackHandler.Create)
 			menu.POST("/ratings", ratingHandler.Create)
+			menu.GET("/menu-items/:id", menuItemHandler.GetByID)
 		}
 	}
 
