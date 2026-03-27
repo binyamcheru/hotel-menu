@@ -3,10 +3,10 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { HotelService } from '@/features/hotels/services/hotel.service';
-import { AuthService } from '@/features/auth/services/auth.service';
-import { useRouter } from 'next/navigation';
-import { ArrowLeft, CheckCircle2, Hotel as HotelIcon, Mail, MapPin, Globe, User } from 'lucide-react';
+import { HotelService, Hotel } from '@/features/hotels/services/hotel.service';
+import { useRouter, useParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { ArrowLeft, Hotel as HotelIcon, MapPin, Globe, Phone, ImageIcon } from 'lucide-react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/features/auth/components/protected-route';
 
@@ -16,46 +16,73 @@ const hotelSchema = z.object({
     phone: z.string().min(10, 'Hotel phone number is required'),
     logo: z.string().url('Invalid logo URL').optional().or(z.literal('')),
     language_settings: z.string().min(2, 'Language settings are required'),
-    // Manager Account
-    manager_email: z.string().email('Invalid email address'),
-    manager_phone: z.string().min(10, 'Manager phone number is required'),
-    manager_password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
 type HotelFormValues = z.infer<typeof hotelSchema>;
 
-export default function AddHotelPage() {
+export default function EditHotelPage() {
     const router = useRouter();
-    const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<HotelFormValues>({
+    const params = useParams();
+    const hotelId = params.id as string;
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<HotelFormValues>({
         resolver: zodResolver(hotelSchema),
-        defaultValues: { language_settings: 'en' },
     });
+
+    useEffect(() => {
+        const fetchHotel = async () => {
+            try {
+                const hotel = await HotelService.getHotelById(hotelId);
+                reset({
+                    name: hotel.name,
+                    address: hotel.address,
+                    phone: hotel.phone,
+                    logo: hotel.logo,
+                    language_settings: hotel.language_settings,
+                });
+            } catch (err) {
+                console.error('Failed to fetch hotel:', err);
+                setError('Failed to load hotel details');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (hotelId) {
+            fetchHotel();
+        }
+    }, [hotelId, reset]);
 
     const onSubmit = async (data: HotelFormValues) => {
         try {
-            // 1. Create Hotel
-            const hotel = await HotelService.addHotel({
-                name: data.name,
-                address: data.address,
-                phone: data.phone,
-                logo: data.logo || '',
-                language_settings: data.language_settings
-            });
-
-            // 2. Register Manager
-            await AuthService.register({
-                hotel_id: hotel.hotel_id,
-                phone_no: data.manager_phone,
-                email: data.manager_email,
-                password: data.manager_password,
-                role: 'admin'
-            });
-
+            await HotelService.updateHotel(hotelId, data);
             router.push('/super-admin/hotels');
-        } catch (error) {
-            console.error('Failed to register hotel and manager:', error);
+        } catch (err) {
+            console.error('Failed to update hotel:', err);
+            alert('Failed to update hotel');
         }
     };
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-[400px]">
+                <div className="animate-spin w-8 h-8 border-4 border-indigo-600 border-b-transparent rounded-full"></div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="text-center py-20">
+                <p className="text-red-500 font-bold">{error}</p>
+                <Link href="/super-admin/hotels" className="text-indigo-600 hover:underline mt-4 inline-block">
+                    Back to Hotels
+                </Link>
+            </div>
+        );
+    }
 
     return (
         <ProtectedRoute allowedRoles={['superadmin']}>
@@ -67,13 +94,12 @@ export default function AddHotelPage() {
 
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
-                        <h1 className="text-3xl font-black text-gray-900 tracking-tight">Add New Hotel</h1>
-                        <p className="text-gray-500">Register a new hotel property and its manager.</p>
+                        <h1 className="text-3xl font-black text-gray-900 tracking-tight">Edit Hotel</h1>
+                        <p className="text-gray-500">Update hotel property information.</p>
                     </div>
                 </div>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 pb-20">
-                    {/* Hotel Details */}
                     <div className="bg-white p-8 rounded-[32px] border border-gray-100 shadow-xl space-y-6">
                         <h2 className="text-xl font-black text-gray-900 flex items-center gap-2">
                             <HotelIcon className="w-6 h-6 text-indigo-600" />
@@ -133,48 +159,6 @@ export default function AddHotelPage() {
                         </div>
                     </div>
 
-                    {/* Manager Account */}
-                    <div className="bg-white p-8 rounded-[32px] border border-gray-100 shadow-xl space-y-6">
-                        <h2 className="text-xl font-black text-gray-900 flex items-center gap-2">
-                            <User className="w-6 h-6 text-purple-600" />
-                            Manager Account
-                        </h2>
-                        <p className="text-sm text-gray-400 font-medium -mt-4">Credentials for the hotel administrator to manage their menu.</p>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-                            <div className="space-y-2">
-                                <label className="text-sm font-bold text-gray-700">Phone Number (Login)</label>
-                                <input
-                                    {...register('manager_phone')}
-                                    placeholder="+251..."
-                                    className="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-purple-500 transition-all font-medium"
-                                />
-                                {errors.manager_phone && <p className="text-xs text-red-500 font-bold ml-2">{errors.manager_phone.message}</p>}
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="text-sm font-bold text-gray-700">Email Address</label>
-                                <input
-                                    {...register('manager_email')}
-                                    placeholder="manager@hotel.com"
-                                    className="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-purple-500 transition-all font-medium"
-                                />
-                                {errors.manager_email && <p className="text-xs text-red-500 font-bold ml-2">{errors.manager_email.message}</p>}
-                            </div>
-
-                            <div className="space-y-2 md:col-span-2">
-                                <label className="text-sm font-bold text-gray-700">Dashboard Password</label>
-                                <input
-                                    {...register('manager_password')}
-                                    type="password"
-                                    placeholder="••••••••"
-                                    className="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-purple-500 transition-all font-medium"
-                                />
-                                {errors.manager_password && <p className="text-xs text-red-500 font-bold ml-2">{errors.manager_password.message}</p>}
-                            </div>
-                        </div>
-                    </div>
-
                     <div className="flex justify-end gap-4">
                         <Link href="/super-admin/hotels" className="px-8 py-4 bg-gray-100 text-gray-600 rounded-2xl font-bold hover:bg-gray-200 transition-all">
                             Cancel
@@ -185,7 +169,7 @@ export default function AddHotelPage() {
                             className="px-10 py-4 bg-indigo-600 text-white rounded-2xl font-bold hover:bg-indigo-700 shadow-xl shadow-indigo-100 transition-all disabled:opacity-50 flex items-center gap-2"
                         >
                             {isSubmitting && <div className="animate-spin w-4 h-4 border-2 border-white/20 border-b-white rounded-full"></div>}
-                            Save Hotel & Manager
+                            Update Hotel
                         </button>
                     </div>
                 </form>

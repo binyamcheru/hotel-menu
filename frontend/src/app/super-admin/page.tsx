@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Hotel, HotelService } from '@/features/hotels/services/hotel.service';
 import { HotelCard } from '@/features/hotels/components/hotel-card';
 import { LayoutDashboard, Hotel as HotelIcon, Users, Activity, Plus } from 'lucide-react';
+import Link from 'next/link';
 
 export default function SuperAdminPage() {
     const [hotels, setHotels] = useState<Hotel[]>([]);
@@ -29,7 +30,7 @@ export default function SuperAdminPage() {
     const stats = [
         { label: 'Total Hotels', value: hotels.length, icon: HotelIcon, color: 'text-indigo-600', bg: 'bg-indigo-50' },
         { label: 'Total Managers', value: hotels.length, icon: Users, color: 'text-purple-600', bg: 'bg-purple-50' },
-        { label: 'Active Menus', value: hotels.filter(h => h.status === 'ACTIVE').length, icon: LayoutDashboard, color: 'text-green-600', bg: 'bg-green-50' },
+        { label: 'Active Menus', value: hotels.length, icon: LayoutDashboard, color: 'text-green-600', bg: 'bg-green-50' },
         { label: 'Monthly Scans', value: '1,240', icon: Activity, color: 'text-blue-600', bg: 'bg-blue-50' },
     ];
 
@@ -41,10 +42,10 @@ export default function SuperAdminPage() {
                     <h1 className="text-3xl font-black text-gray-900 tracking-tight">Platform Overview</h1>
                     <p className="text-gray-500">Welcome back, Super Admin. Here is what is happening today.</p>
                 </div>
-                <button className="flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-2xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 active:scale-95">
+                <Link href="/super-admin/hotels/add" className="flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-2xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 active:scale-95">
                     <Plus className="w-5 h-5" />
                     Add New Hotel
-                </button>
+                </Link>
             </div>
 
             {/* Stats Grid */}
@@ -64,11 +65,11 @@ export default function SuperAdminPage() {
             <div className="space-y-6">
                 <div className="flex justify-between items-end">
                     <h2 className="text-2xl font-black text-gray-900 tracking-tight">Registered Hotels</h2>
-                    <button className="text-indigo-600 font-bold text-sm hover:underline">View All Hotels</button>
+                    <Link href="/super-admin/hotels" className="text-indigo-600 font-bold text-sm hover:underline">View All Hotels</Link>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {hotels.map((hotel) => (
-                        <HotelCard key={hotel.id} hotel={hotel} />
+                        <HotelCard key={hotel.hotel_id} hotel={hotel} />
                     ))}
                 </div>
             </div>
