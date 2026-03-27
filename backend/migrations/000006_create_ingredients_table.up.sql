@@ -3,7 +3,8 @@ CREATE TABLE ingredients (
     hotel_id UUID NOT NULL REFERENCES hotels(hotel_id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
     is_allergen BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE (hotel_id, name)
 );
 
 CREATE INDEX idx_ingredients_hotel_id ON ingredients(hotel_id);

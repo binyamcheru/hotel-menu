@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"errors"
+
 	"backend/internal/domain"
 	"backend/internal/service"
 	"backend/internal/utils"
@@ -15,6 +17,22 @@ type IngredientHandler struct {
 
 func NewIngredientHandler(ingredientService *service.IngredientService) *IngredientHandler {
 	return &IngredientHandler{ingredientService: ingredientService}
+}
+
+// handleIngredientError maps domain errors to appropriate HTTP responses.
+func handleIngredientError(c *gin.Context, err error) {
+	switch {
+	case errors.Is(err, domain.ErrIngredientNotFound):
+		utils.NotFoundResponse(c, err.Error())
+	case errors.Is(err, domain.ErrMenuItemNotFound):
+		utils.NotFoundResponse(c, err.Error())
+	case errors.Is(err, domain.ErrIngredientAlreadyLinked):
+		utils.ConflictResponse(c, err.Error())
+	case errors.Is(err, domain.ErrHotelMismatch):
+		utils.BadRequestResponse(c, err.Error())
+	default:
+		utils.InternalErrorResponse(c, err.Error())
+	}
 }
 
 // Create godoc
@@ -38,7 +56,7 @@ func (h *IngredientHandler) Create(c *gin.Context) {
 	}
 	ing, err := h.ingredientService.Create(c.Request.Context(), req)
 	if err != nil {
-		utils.InternalErrorResponse(c, err.Error())
+		handleIngredientError(c, err)
 		return
 	}
 	utils.CreatedResponse(c, "Ingredient created", ing)
@@ -64,7 +82,7 @@ func (h *IngredientHandler) GetByHotelID(c *gin.Context) {
 	}
 	ings, err := h.ingredientService.GetByHotelID(c.Request.Context(), hotelID)
 	if err != nil {
-		utils.InternalErrorResponse(c, err.Error())
+		handleIngredientError(c, err)
 		return
 	}
 	utils.OKResponse(c, "Ingredients retrieved", ings)
@@ -79,6 +97,7 @@ func (h *IngredientHandler) GetByHotelID(c *gin.Context) {
 // @Success      200  {object}  utils.Response
 // @Failure      400  {object}  utils.Response
 // @Failure      401  {object}  utils.Response
+// @Failure      404  {object}  utils.Response
 // @Failure      500  {object}  utils.Response
 // @Security     BearerAuth
 // @Router       /ingredients/{id} [delete]
@@ -89,7 +108,7 @@ func (h *IngredientHandler) Delete(c *gin.Context) {
 		return
 	}
 	if err := h.ingredientService.Delete(c.Request.Context(), id); err != nil {
-		utils.InternalErrorResponse(c, err.Error())
+		handleIngredientError(c, err)
 		return
 	}
 	utils.OKResponse(c, "Ingredient deleted", nil)
@@ -105,6 +124,8 @@ func (h *IngredientHandler) Delete(c *gin.Context) {
 // @Success      201      {object}  utils.Response
 // @Failure      400      {object}  utils.Response
 // @Failure      401      {object}  utils.Response
+// @Failure      404      {object}  utils.Response
+// @Failure      409      {object}  utils.Response
 // @Failure      500      {object}  utils.Response
 // @Security     BearerAuth
 // @Router       /menu-items/ingredients [post]
@@ -115,10 +136,38 @@ func (h *IngredientHandler) AddToMenuItem(c *gin.Context) {
 		return
 	}
 	if err := h.ingredientService.AddToMenuItem(c.Request.Context(), req.MenuItemID, req.IngredientID); err != nil {
-		utils.InternalErrorResponse(c, err.Error())
+		handleIngredientError(c, err)
 		return
 	}
 	utils.CreatedResponse(c, "Ingredient added to menu item", nil)
+}
+
+// BulkAddToMenuItem godoc
+// @Summary      Bulk add ingredients to menu item
+// @Description  Link multiple ingredients to a menu item at once (admin/superadmin only). Duplicates are skipped.
+// @Tags         Ingredients
+// @Accept       json
+// @Produce      json
+// @Param        request  body      domain.BulkAddMenuItemIngredientsRequest  true  "Menu item ID and ingredient IDs"
+// @Success      201      {object}  utils.Response{data=domain.BulkAddResult}
+// @Failure      400      {object}  utils.Response
+// @Failure      401      {object}  utils.Response
+// @Failure      404      {object}  utils.Response
+// @Failure      500      {object}  utils.Response
+// @Security     BearerAuth
+// @Router       /menu-items/ingredients/bulk [post]
+func (h *IngredientHandler) BulkAddToMenuItem(c *gin.Context) {
+	var req domain.BulkAddMenuItemIngredientsRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		utils.BadRequestResponse(c, err.Error())
+		return
+	}
+	result, err := h.ingredientService.BulkAddToMenuItem(c.Request.Context(), req.MenuItemID, req.IngredientIDs)
+	if err != nil {
+		handleIngredientError(c, err)
+		return
+	}
+	utils.CreatedResponse(c, "Bulk ingredient assignment completed", result)
 }
 
 // RemoveFromMenuItem godoc
@@ -146,7 +195,7 @@ func (h *IngredientHandler) RemoveFromMenuItem(c *gin.Context) {
 		return
 	}
 	if err := h.ingredientService.RemoveFromMenuItem(c.Request.Context(), menuItemID, ingredientID); err != nil {
-		utils.InternalErrorResponse(c, err.Error())
+		handleIngredientError(c, err)
 		return
 	}
 	utils.OKResponse(c, "Ingredient removed from menu item", nil)
@@ -170,7 +219,7 @@ func (h *IngredientHandler) GetByMenuItemID(c *gin.Context) {
 	}
 	ings, err := h.ingredientService.GetByMenuItemID(c.Request.Context(), menuItemID)
 	if err != nil {
-		utils.InternalErrorResponse(c, err.Error())
+		handleIngredientError(c, err)
 		return
 	}
 	utils.OKResponse(c, "Ingredients retrieved", ings)

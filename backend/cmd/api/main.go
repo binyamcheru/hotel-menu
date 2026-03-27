@@ -68,7 +68,7 @@ func main() {
 	categoryService := service.NewCategoryService(categoryRepo)
 	chefService := service.NewChefService(chefRepo)
 	menuItemService := service.NewMenuItemService(menuItemRepo)
-	ingredientService := service.NewIngredientService(ingredientRepo, menuItemIngredientRepo)
+	ingredientService := service.NewIngredientService(ingredientRepo, menuItemIngredientRepo, menuItemRepo)
 	ratingService := service.NewRatingService(ratingRepo)
 	discountService := service.NewDiscountService(discountRepo)
 	analyticsService := service.NewAnalyticsService(hotelScanRepo, menuViewRepo)
@@ -168,6 +168,7 @@ func main() {
 			adminOnly.GET("/hotels/:id/ingredients", ingredientHandler.GetByHotelID)
 			adminOnly.DELETE("/ingredients/:id", ingredientHandler.Delete)
 			adminOnly.POST("/menu-items/ingredients", ingredientHandler.AddToMenuItem)
+			adminOnly.POST("/menu-items/ingredients/bulk", ingredientHandler.BulkAddToMenuItem)
 			adminOnly.DELETE("/menu-items/:id/ingredients/:ingredient_id", ingredientHandler.RemoveFromMenuItem)
 
 			// Discount Management

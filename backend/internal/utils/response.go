@@ -54,3 +54,7 @@ func UnauthorizedResponse(c *gin.Context, message string) {
 func ForbiddenResponse(c *gin.Context, message string) {
 	ErrorResponse(c, http.StatusForbidden, message)
 }
+
+func ConflictResponse(c *gin.Context, message string) {
+	ErrorResponse(c, http.StatusConflict, message)
+}

@@ -112,3 +112,10 @@ func (r *menuItemIngredientRepository) GetByMenuItemID(ctx context.Context, menu
 	}
 	return ings, nil
 }
+
+func (r *menuItemIngredientRepository) Exists(ctx context.Context, menuItemID, ingredientID uuid.UUID) (bool, error) {
+	var exists bool
+	query := `SELECT EXISTS(SELECT 1 FROM menu_item_ingredients WHERE menu_item_id=$1 AND ingredient_id=$2)`
+	err := r.db.QueryRow(ctx, query, menuItemID, ingredientID).Scan(&exists)
+	return exists, err
+}

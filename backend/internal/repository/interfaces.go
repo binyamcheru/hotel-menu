@@ -70,6 +70,7 @@ type MenuItemIngredientRepository interface {
 	Add(ctx context.Context, menuItemID, ingredientID uuid.UUID) error
 	Remove(ctx context.Context, menuItemID, ingredientID uuid.UUID) error
 	GetByMenuItemID(ctx context.Context, menuItemID uuid.UUID) ([]domain.Ingredient, error)
+	Exists(ctx context.Context, menuItemID, ingredientID uuid.UUID) (bool, error)
 }
 
 // RatingRepository defines the interface for rating data access.
