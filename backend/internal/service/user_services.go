@@ -26,6 +26,7 @@ func (s *UserService) GetByHotelID(ctx context.Context, hotelID uuid.UUID) ([]do
 	return s.repo.GetByHotelID(ctx, hotelID)
 }
 
+
 func (s *UserService) Update(ctx context.Context, id uuid.UUID, req domain.UpdateUserRequest) (*domain.User, error) {
 	user, err := s.repo.GetByID(ctx, id)
 	if err != nil {

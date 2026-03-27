@@ -96,3 +96,29 @@ func (h *AuthHandler) Refresh(c *gin.Context) {
 
 	utils.OKResponse(c, "Token refreshed successfully", pair)
 }
+
+
+func (h *AuthHandler) Logout(c *gin.Context) {
+	token := extractToken(c) // from header
+
+	if token == "" {
+		utils.BadRequestResponse(c, "Missing token")
+		return
+	}
+
+	err := h.authService.Logout(c.Request.Context(), token)
+	if err != nil {
+		utils.InternalErrorResponse(c, "Logout failed")
+		return
+	}
+	utils.OKResponse(c, "Logout successful", nil)
+}
+
+func extractToken(c *gin.Context) string {
+	bearerToken := c.GetHeader("Authorization")
+
+	if len(bearerToken) > 7 && bearerToken[:7] == "Bearer " {
+		return bearerToken[7:]
+	}
+	return ""
+}

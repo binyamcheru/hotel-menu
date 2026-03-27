@@ -54,6 +54,7 @@ func (r *userRepository) GetByPhoneNo(ctx context.Context, phoneNo string) (*dom
 	return user, nil
 }
 
+
 func (r *userRepository) GetByHotelID(ctx context.Context, hotelID uuid.UUID) ([]domain.User, error) {
 	query := `SELECT user_id, hotel_id, phone_no, email, password, role, is_active, created_at, updated_at
 			  FROM users WHERE hotel_id = $1 ORDER BY created_at DESC`

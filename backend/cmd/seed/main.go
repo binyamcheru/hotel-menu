@@ -20,9 +20,11 @@ func main() {
 	db := database.Connect(cfg.DatabaseURL())
 	defer db.Close()
 
+	rdb := database.ConnectRedis(cfg.RedisAddr(), cfg.RedisPassword)
+
 	userRepo := repository.NewUserRepository(db)
 	hotelRepo := repository.NewHotelRepository(db)
-	authService := service.NewAuthService(userRepo, cfg.JWTSecret, cfg.AccessTokenExpiry, cfg.RefreshTokenExpiry)
+	authService := service.NewAuthService(userRepo, rdb, cfg.JWTSecret, cfg.AccessTokenExpiry, cfg.RefreshTokenExpiry)
 	hotelService := service.NewHotelService(hotelRepo)
 
 	ctx := context.Background()

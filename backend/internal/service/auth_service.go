@@ -11,18 +11,21 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"github.com/redis/go-redis/v9"
 )
 
 type AuthService struct {
 	userRepo           repository.UserRepository
+	rdb                *redis.Client
 	jwtSecret          string
 	accessTokenExpiry  time.Duration
 	refreshTokenExpiry time.Duration
 }
 
-func NewAuthService(userRepo repository.UserRepository, jwtSecret string, accessExpiry, refreshExpiry time.Duration) *AuthService {
+func NewAuthService(userRepo repository.UserRepository, rdb *redis.Client, jwtSecret string, accessExpiry, refreshExpiry time.Duration) *AuthService {
 	return &AuthService{
 		userRepo:           userRepo,
+		rdb:                rdb,
 		jwtSecret:          jwtSecret,
 		accessTokenExpiry:  accessExpiry,
 		refreshTokenExpiry: refreshExpiry,
@@ -153,5 +156,46 @@ func (s *AuthService) Register(ctx context.Context, req domain.CreateUserRequest
 	}
 
 	return user, nil
+}
+
+func (s *AuthService) Logout(ctx context.Context, tokenString string) error {
+	if s.rdb == nil {
+		return nil // Redis is optional, but if not there, logout is just client-side
+	}
+
+	token, _, err := jwt.NewParser().ParseUnverified(tokenString, jwt.MapClaims{})
+	if err != nil {
+		return err
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return errors.New("invalid claims")
+	}
+
+	exp, ok := claims["exp"].(float64)
+	if !ok {
+		return errors.New("expiration claim missing")
+	}
+
+	ttl := time.Until(time.Unix(int64(exp), 0))
+	if ttl <= 0 {
+		return nil
+	}
+
+	return s.rdb.Set(ctx, "blacklist:"+tokenString, "true", ttl).Err()
+}
+
+func (s *AuthService) IsTokenBlacklisted(ctx context.Context, tokenString string) (bool, error) {
+	if s.rdb == nil {
+		return false, nil
+	}
+
+	exists, err := s.rdb.Exists(ctx, "blacklist:"+tokenString).Result()
+	if err != nil {
+		return false, err
+	}
+
+	return exists > 0, nil
 }
 

@@ -62,7 +62,7 @@ func main() {
 	feedbackRepo := repository.NewFeedbackRepository(db)
 
 	// 5. Initialize services
-	authService := service.NewAuthService(userRepo, cfg.JWTSecret, cfg.AccessTokenExpiry, cfg.RefreshTokenExpiry)
+	authService := service.NewAuthService(userRepo, rdb, cfg.JWTSecret, cfg.AccessTokenExpiry, cfg.RefreshTokenExpiry)
 	hotelService := service.NewHotelService(hotelRepo)
 	userService := service.NewUserService(userRepo)
 	categoryService := service.NewCategoryService(categoryRepo)
@@ -107,6 +107,7 @@ func main() {
 			auth.POST("/login", authHandler.Login)
 			auth.POST("/register", authHandler.Register)
 			auth.POST("/refresh", authHandler.Refresh)
+			auth.POST("/logout", authHandler.Logout)
 		}
 
 		// Public Menu Viewing (with Redis caching)
@@ -131,7 +132,7 @@ func main() {
 
 	// Protected Routes (Required Auth)
 	protected := api.Group("")
-	protected.Use(middleware.AuthMiddleware(cfg.JWTSecret))
+	protected.Use(middleware.AuthMiddleware(cfg.JWTSecret, authService))
 	{
 		// General Protected User Endpoints
 		protected.GET("/me", userHandler.GetByID)
