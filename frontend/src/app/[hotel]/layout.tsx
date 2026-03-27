@@ -1,13 +1,13 @@
 import React from 'react';
 
-export default function HotelLayout({
+export default async function HotelLayout({
     children,
     params,
 }: {
     children: React.ReactNode;
-    params: { hotel: string };
+    params: Promise<{ hotel: string }>;
 }) {
-    const hotel = params.hotel;
+    const { hotel } = await params;
 
     return (
         <div className="min-h-screen bg-gray-50">

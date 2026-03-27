@@ -2,32 +2,51 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { FoodItem, FoodService, Category } from '@/features/menu/services/food.service';
+import { Hotel, HotelService } from '@/features/hotels/services/hotel.service';
+import { FoodItem, Category, FoodService } from '@/features/menu/services/food.service';
+import { ReviewService } from '@/features/reviews/services/review.service';
+import { Star, Clock, MapPin, Search, Info, Plus } from 'lucide-react';
 import { MenuItemCard } from '@/features/menu/components/menu-item-card';
-import { Search, Info, Star, Clock, MapPin } from 'lucide-react';
 
 export default function PublicMenuPage() {
     const params = useParams();
-    const hotelSlug = params?.hotel as string;
+    const hotelIdOrSlug = params?.hotel as string;
     const [foods, setFoods] = useState<FoodItem[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
+    const [hotel, setHotel] = useState<Hotel | null>(null);
     const [activeCategory, setActiveCategory] = useState<string>('All');
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
-            if (hotelSlug) {
-                const [f, c] = await Promise.all([
-                    FoodService.getFoodsByHotel(hotelSlug),
-                    FoodService.getCategoriesByHotel(hotelSlug)
-                ]);
-                setFoods(f);
-                setCategories([{ id: 'all', name: 'All', hotelSlug }, ...c]);
+            if (hotelIdOrSlug) {
+                try {
+                    // Record scan
+                    ReviewService.recordScan(hotelIdOrSlug).catch(console.error);
+
+                    const [f, c, h] = await Promise.all([
+                        FoodService.getFoodsByHotel(hotelIdOrSlug),
+                        FoodService.getCategoriesByHotel(hotelIdOrSlug),
+                        HotelService.getHotelById(hotelIdOrSlug)
+                    ]);
+                    setFoods(f);
+                    const allCat: any = { id: 0, name: { en: 'All', am: 'ሁሉም' } };
+                    setCategories([allCat, ...c]);
+                    setHotel(h);
+                } catch (error) {
+                    console.error('Error fetching menu data:', error);
+                }
             }
             setLoading(false);
         };
         fetchData();
-    }, [hotelSlug]);
+    }, [hotelIdOrSlug]);
+
+    const handleItemClick = (foodId: number) => {
+        if (hotelIdOrSlug) {
+            ReviewService.recordMenuItemView(hotelIdOrSlug, foodId).catch(console.error);
+        }
+    };
 
     if (loading) {
         return (
@@ -39,14 +58,20 @@ export default function PublicMenuPage() {
 
     const filteredFoods = activeCategory === 'All'
         ? foods
-        : foods.filter(f => f.category === activeCategory);
+        : foods.filter(f => {
+            // Find category name for the food's category_id
+            const cat = categories.find(c => c.id === f.category_id);
+            return cat?.name.en === activeCategory;
+        });
+
+    const hotelName = hotel?.name || hotelIdOrSlug.replace('-', ' ');
 
     return (
         <div className="min-h-screen bg-gray-50 pb-20 font-sans max-w-lg mx-auto shadow-2xl overflow-hidden relative border-x border-gray-100">
             {/* Hotel Header */}
             <div className="relative h-64 bg-gray-900">
                 <img
-                    src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=1000"
+                    src={hotel?.logo || "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=1000"}
                     alt="Hotel"
                     className="w-full h-full object-cover opacity-60"
                 />
@@ -54,11 +79,11 @@ export default function PublicMenuPage() {
                     <div className="bg-white p-6 rounded-[32px] shadow-xl border border-gray-50 relative -mt-32">
                         <div className="flex justify-between items-start">
                             <div>
-                                <h1 className="text-2xl font-black text-gray-900 capitalize tracking-tight">{hotelSlug.replace('-', ' ')}</h1>
+                                <h1 className="text-2xl font-black text-gray-900 capitalize tracking-tight">{hotelName}</h1>
                                 <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">International Cuisine</p>
                             </div>
                             <div className="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center text-white font-black italic text-xl shadow-lg shadow-indigo-100">
-                                {hotelSlug.charAt(0).toUpperCase()}
+                                {hotelName.charAt(0).toUpperCase()}
                             </div>
                         </div>
 
@@ -73,7 +98,7 @@ export default function PublicMenuPage() {
                             </div>
                             <div className="flex items-center gap-1 text-gray-400">
                                 <MapPin className="w-3.5 h-3.5" />
-                                <span className="text-[10px] font-bold uppercase truncate w-20">Grand Plaza</span>
+                                <span className="text-[10px] font-bold uppercase truncate w-20">{hotel?.address || 'Hotel Location'}</span>
                             </div>
                         </div>
                     </div>
@@ -97,13 +122,13 @@ export default function PublicMenuPage() {
                     {categories.map((cat) => (
                         <button
                             key={cat.id}
-                            onClick={() => setActiveCategory(cat.name)}
-                            className={`px-6 py-3 rounded-2xl font-black whitespace-nowrap text-sm tracking-tight transition-all ${activeCategory === cat.name
-                                    ? 'bg-gray-900 text-white shadow-lg'
-                                    : 'bg-white text-gray-400 hover:text-gray-900'
+                            onClick={() => setActiveCategory(cat.name.en)}
+                            className={`px-6 py-3 rounded-2xl font-black whitespace-nowrap text-sm tracking-tight transition-all ${activeCategory === cat.name.en
+                                ? 'bg-gray-900 text-white shadow-lg'
+                                : 'bg-white text-gray-400 hover:text-gray-900'
                                 }`}
                         >
-                            {cat.name}
+                            {cat.name.en}
                         </button>
                     ))}
                 </div>
@@ -116,7 +141,11 @@ export default function PublicMenuPage() {
                     </div>
                     <div className="grid grid-cols-1 gap-4 pb-10">
                         {filteredFoods.map((food) => (
-                            <MenuItemCard key={food.id} item={food} />
+                            <MenuItemCard
+                                key={food.id}
+                                item={food}
+                                onClick={() => handleItemClick(food.id)}
+                            />
                         ))}
                     </div>
                 </div>

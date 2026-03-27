@@ -1,86 +1,85 @@
-export interface Review {
+import api from '@/lib/api';
+import { GenericResponse } from '@/types/auth';
+
+export interface Rating {
     id: string;
-    customerName: string;
+    menu_item_id: string;
+    hotel_id: string;
     rating: number;
     comment: string;
-    date: string;
-    hotelSlug: string;
-    foodId?: string;
-    foodName?: string;
+    language: string;
+    created_at: string;
+}
+
+export interface SubmitRatingRequest {
+    rating: number;
+    comment: string;
+    menu_item_id: string;
+    hotel_id: string;
+    language: string;
 }
 
 export interface Analytics {
-    totalScans: number;
-    uniqueVisitors: number;
-    averageRating: number;
-    popularItems: { name: string; count: number }[];
-    scansPerDay: { date: string; count: number }[];
+    total_scans: number;
+    total_menu_views: number;
+    totalScans?: number;
+    uniqueVisitors?: number;
+    averageRating?: number;
+    popularItems: {
+        name: string;
+        count: number;
+    }[];
 }
 
-const mockReviews: Review[] = [
-    {
-        id: 'r1',
-        customerName: 'Alice Thompson',
-        rating: 5,
-        comment: 'The salmon was absolutely delicious! Perfectly cooked and very flavorful.',
-        date: '2024-03-10',
-        hotelSlug: 'grand-plaza',
-        foodId: 'f1',
-        foodName: 'Grilled Atlantic Salmon',
-    },
-    {
-        id: 'r2',
-        customerName: 'Robert Wilson',
-        rating: 4,
-        comment: 'Great atmosphere and fast service. The margherita pizza was good but could use more basil.',
-        date: '2024-03-08',
-        hotelSlug: 'grand-plaza',
-        foodId: 'f2',
-        foodName: 'Classic Margherita Pizza',
-    },
-    {
-        id: 'r3',
-        customerName: 'Emily Davis',
-        rating: 5,
-        comment: 'Best dessert I have had in a long time. The chocolate mousse is a must-try!',
-        date: '2024-03-05',
-        hotelSlug: 'grand-plaza',
-        foodId: 'f5',
-        foodName: 'Triple Chocolate Mousse',
-    },
-];
-
-const mockAnalytics: Record<string, Analytics> = {
-    'grand-plaza': {
-        totalScans: 1240,
-        uniqueVisitors: 850,
-        averageRating: 4.7,
-        popularItems: [
-            { name: 'Grilled Atlantic Salmon', count: 320 },
-            { name: 'Classic Margherita Pizza', count: 280 },
-            { name: 'Triple Chocolate Mousse', count: 210 },
-        ],
-        scansPerDay: [
-            { date: '2024-03-01', count: 45 },
-            { date: '2024-03-02', count: 52 },
-            { date: '2024-03-03', count: 88 },
-            { date: '2024-03-04', count: 65 },
-            { date: '2024-03-05', count: 70 },
-            { date: '2024-03-06', count: 110 },
-            { date: '2024-03-07', count: 95 },
-        ],
-    },
-};
-
 export const ReviewService = {
-    getReviewsByHotel: async (hotelSlug: string): Promise<Review[]> => {
-        return new Promise((resolve) => setTimeout(() => resolve(mockReviews.filter(r => r.hotelSlug === hotelSlug)), 600));
+    submitRating: async (data: SubmitRatingRequest): Promise<Rating> => {
+        const response = await api.post<GenericResponse<any>>('/menu/ratings', data);
+        const r = response.data.data;
+        return {
+            id: r.rating_id,
+            menu_item_id: r.menu_item_id,
+            hotel_id: r.hotel_id,
+            rating: r.rating,
+            comment: r.comment,
+            language: r.language,
+            created_at: r.created_at
+        };
     },
-    getAnalyticsByHotel: async (hotelSlug: string): Promise<Analytics> => {
-        return new Promise((resolve) => setTimeout(() => resolve(mockAnalytics[hotelSlug] || mockAnalytics['grand-plaza']), 800));
+    getMenuItemRatings: async (menuItemId: string): Promise<Rating[]> => {
+        const response = await api.get<GenericResponse<any[]>>(`/menu/menu-items/${menuItemId}/ratings`);
+        return response.data.data.map(r => ({
+            id: r.rating_id,
+            menu_item_id: r.menu_item_id,
+            hotel_id: r.hotel_id,
+            rating: r.rating,
+            comment: r.comment,
+            language: r.language,
+            created_at: r.created_at
+        }));
     },
-    submitReview: async (review: Omit<Review, 'id' | 'date'>): Promise<Review> => {
-        const newReview = { ...review, id: Math.random().toString(36).substr(2, 9), date: new Date().toISOString().split('T')[0] };
-        return new Promise((resolve) => setTimeout(() => resolve(newReview), 1000));
+    getAverageRating: async (menuItemId: string): Promise<{ average_rating: number }> => {
+        const response = await api.get<GenericResponse<{ average_rating: number }>>(`/menu/menu-items/${menuItemId}/average-rating`);
+        return response.data.data;
+    },
+    getAnalyticsByHotel: async (hotelId: string): Promise<Analytics> => {
+        const response = await api.get<GenericResponse<any>>(`/hotels/${hotelId}/analytics`);
+        const data = response.data.data;
+        return {
+            total_scans: data.total_scans,
+            total_menu_views: data.total_menu_views,
+            totalScans: data.total_scans,
+            uniqueVisitors: 0, // Not provided by current backend
+            averageRating: 0, // Not provided by current backend
+            popularItems: [] // Not provided by current backend
+        };
+    },
+    recordScan: async (hotelId: string): Promise<void> => {
+        await api.post(`/menu/hotels/${hotelId}/scan`);
+    },
+    recordMenuItemView: async (hotelId: string, menuItemId: string): Promise<void> => {
+        await api.post(`/menu/hotels/${hotelId}/menu-items/${menuItemId}/view`);
+    },
+    deleteRating: async (id: string): Promise<void> => {
+        await api.delete(`/ratings/${id}`);
     }
 };

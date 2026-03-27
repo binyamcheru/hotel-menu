@@ -1,112 +1,169 @@
+import api from '@/lib/api';
+import { MultilingualText, GenericResponse } from '@/types/auth';
+
+export interface Ingredient {
+    id: number;
+    name: MultilingualText;
+    is_allergen: boolean;
+}
+
 export interface FoodItem {
     id: string;
-    name: string;
-    description: string;
+    hotel_id: string;
+    category_id: string;
+    name: MultilingualText;
+    description: MultilingualText;
     price: number;
-    category: string;
-    image: string;
-    available: boolean;
-    hotelSlug: string;
-    isPopular?: boolean;
-    calories?: string;
+    image_url: string;
+    is_available: boolean;
+    is_special: boolean;
+    rating?: number;
+    slug: string;
+    created_at: string;
+    updated_at: string;
 }
 
 export interface Category {
     id: string;
-    name: string;
-    hotelSlug: string;
+    hotel_id: string;
+    name: MultilingualText;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
 }
 
-const mockFoods: FoodItem[] = [
-    {
-        id: 'f1',
-        name: 'Grilled Atlantic Salmon',
-        description: 'Fresh Atlantic salmon fillet, grilled to perfection with a lemon butter glaze and seasonal vegetables.',
-        price: 24.50,
-        category: 'Main Courses',
-        image: 'https://images.unsplash.com/photo-1485921325833-c519f76c4927?q=80&w=800',
-        available: true,
-        hotelSlug: 'grand-plaza',
-        isPopular: true,
-        calories: '450 kcal',
-    },
-    {
-        id: 'f2',
-        name: 'Classic Margherita Pizza',
-        description: 'Hand-stretched dough, San Marzano tomato sauce, fresh buffalo mozzarella, and basil peaks.',
-        price: 18.00,
-        category: 'Pizzas',
-        image: 'https://images.unsplash.com/photo-1574071318508-1cdbad80ad38?q=80&w=800',
-        available: true,
-        hotelSlug: 'grand-plaza',
-        isPopular: true,
-    },
-    {
-        id: 'f3',
-        name: 'Truffle Mushroom Risotto',
-        description: 'Creamy Arborio rice with wild mushrooms, parmesan cheese, and a drizzle of white truffle oil.',
-        price: 21.00,
-        category: 'Main Courses',
-        image: 'https://images.unsplash.com/photo-1476124369491-e7addf5db371?q=80&w=800',
-        available: true,
-        hotelSlug: 'grand-plaza',
-    },
-    {
-        id: 'f4',
-        name: 'Caesar Salad with Chicken',
-        description: 'Crisp romaine lettuce, herb croutons, parmesan flakes, grilled chicken breast, and creamy Caesar dressing.',
-        price: 15.50,
-        category: 'Salads',
-        image: 'https://images.unsplash.com/photo-1550304943-4f24f54ddde9?q=80&w=800',
-        available: true,
-        hotelSlug: 'grand-plaza',
-        calories: '320 kcal',
-    },
-    {
-        id: 'f5',
-        name: 'Triple Chocolate Mousse',
-        description: 'Rich dark, milk, and white chocolate layers served with fresh berries and raspberry coulis.',
-        price: 10.50,
-        category: 'Desserts',
-        image: 'https://images.unsplash.com/photo-1511911063855-2bf39afa5b2e?q=80&w=800',
-        available: true,
-        hotelSlug: 'grand-plaza',
-        isPopular: true,
-    },
-    {
-        id: 'f6',
-        name: 'Signature Beef Burger',
-        description: 'Aged beef patty, caramelized onions, cheddar cheese, brioche bun, and secret house sauce.',
-        price: 19.50,
-        category: 'Main Courses',
-        image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=800',
-        available: false,
-        hotelSlug: 'grand-plaza',
-    },
-];
+export interface CreateMenuItemRequest {
+    category_id: number;
+    name: MultilingualText;
+    description: MultilingualText;
+    price: number;
+    image_url: string;
+    is_available: boolean;
+    is_special: boolean;
+}
 
-const mockCategories: Category[] = [
-    { id: 'c1', name: 'Main Courses', hotelSlug: 'grand-plaza' },
-    { id: 'c2', name: 'Pizzas', hotelSlug: 'grand-plaza' },
-    { id: 'c3', name: 'Salads', hotelSlug: 'grand-plaza' },
-    { id: 'c4', name: 'Desserts', hotelSlug: 'grand-plaza' },
-];
+export interface CreateCategoryRequest {
+    name: MultilingualText;
+}
 
 export const FoodService = {
-    getFoodsByHotel: async (hotelSlug: string): Promise<FoodItem[]> => {
-        return new Promise((resolve) => setTimeout(() => resolve(mockFoods.filter(f => f.hotelSlug === hotelSlug)), 600));
+    getFoodsByHotel: async (hotelId: string): Promise<FoodItem[]> => {
+        const response = await api.get<GenericResponse<any[]>>(`/menu/hotels/${hotelId}/menu-items`);
+        return response.data.data.map(item => ({
+            id: item.menu_item_id,
+            hotel_id: item.hotel_id,
+            category_id: item.category_id,
+            name: { en: item.name_en, am: item.name_am },
+            description: { en: item.description_en, am: item.description_am },
+            price: item.price,
+            image_url: item.image_url,
+            is_available: item.is_available,
+            is_special: item.is_special,
+            slug: item.slug,
+            created_at: item.created_at,
+            updated_at: item.updated_at
+        }));
     },
-    getCategoriesByHotel: async (hotelSlug: string): Promise<Category[]> => {
-        return new Promise((resolve) => setTimeout(() => resolve(mockCategories.filter(c => c.hotelSlug === hotelSlug)), 400));
+    getCategoriesByHotel: async (hotelId: string): Promise<Category[]> => {
+        const response = await api.get<GenericResponse<any[]>>(`/menu/hotels/${hotelId}/categories`);
+        return response.data.data.map(cat => ({
+            id: cat.category_id,
+            hotel_id: cat.hotel_id,
+            name: { en: cat.name_en, am: cat.name_am },
+            is_active: cat.is_active,
+            created_at: cat.created_at,
+            updated_at: cat.updated_at
+        }));
     },
-    addFoodItem: async (food: Omit<FoodItem, 'id'>): Promise<FoodItem> => {
-        const newFood = { ...food, id: Math.random().toString(36).substr(2, 9) };
-        return new Promise((resolve) => setTimeout(() => resolve(newFood), 800));
+    getFoodBySlug: async (slug: string): Promise<FoodItem> => {
+        const response = await api.get<GenericResponse<any>>(`/menu/menu-items/slug/${slug}`);
+        const item = response.data.data;
+        return {
+            id: item.menu_item_id,
+            hotel_id: item.hotel_id,
+            category_id: item.category_id,
+            name: { en: item.name_en, am: item.name_am },
+            description: { en: item.description_en, am: item.description_am },
+            price: item.price,
+            image_url: item.image_url,
+            is_available: item.is_available,
+            is_special: item.is_special,
+            slug: item.slug,
+            created_at: item.created_at,
+            updated_at: item.updated_at
+        };
     },
-    updateFoodItem: async (id: string, food: Partial<FoodItem>): Promise<FoodItem> => {
-        return new Promise((resolve) => setTimeout(() => resolve({ ...mockFoods[0], ...food, id }), 700));
+    getFoodById: async (id: string): Promise<FoodItem> => {
+        const response = await api.get<GenericResponse<any>>(`/menu/menu-items/${id}`);
+        const item = response.data.data;
+        return {
+            id: item.menu_item_id,
+            hotel_id: item.hotel_id,
+            category_id: item.category_id,
+            name: { en: item.name_en, am: item.name_am },
+            description: { en: item.description_en, am: item.description_am },
+            price: item.price,
+            image_url: item.image_url,
+            is_available: item.is_available,
+            is_special: item.is_special,
+            slug: item.slug,
+            created_at: item.created_at,
+            updated_at: item.updated_at
+        };
     },
-    deleteFoodItem: async (id: string): Promise<boolean> => {
-        return new Promise((resolve) => setTimeout(() => resolve(true), 500));
+    addFoodItem: async (hotelId: string, food: any): Promise<FoodItem> => {
+        // Map frontend CreateMenuItemRequest to backend flattened fields
+        const backendFood = {
+            hotel_id: hotelId,
+            category_id: food.category_id,
+            name_en: food.name.en,
+            name_am: food.name.am,
+            description_en: food.description.en,
+            description_am: food.description.am,
+            price: food.price,
+            image_url: food.image_url,
+            is_available: food.is_available,
+            is_special: food.is_special
+        };
+        const response = await api.post<GenericResponse<any>>(`/menu/hotels/${hotelId}/menu-items`, backendFood);
+        const item = response.data.data;
+        return {
+            id: item.menu_item_id,
+            hotel_id: item.hotel_id,
+            category_id: item.category_id,
+            name: { en: item.name_en, am: item.name_am },
+            description: { en: item.description_en, am: item.description_am },
+            price: item.price,
+            image_url: item.image_url,
+            is_available: item.is_available,
+            is_special: item.is_special,
+            slug: item.slug,
+            created_at: item.created_at,
+            updated_at: item.updated_at
+        };
+    },
+    addCategory: async (hotelId: string, category: any): Promise<Category> => {
+        const backendCat = {
+            hotel_id: hotelId,
+            name_en: category.name.en,
+            name_am: category.name.am,
+            is_active: true
+        };
+        const response = await api.post<GenericResponse<any>>(`/menu/hotels/${hotelId}/categories`, backendCat);
+        const cat = response.data.data;
+        return {
+            id: cat.category_id,
+            hotel_id: cat.hotel_id,
+            name: { en: cat.name_en, am: cat.name_am },
+            is_active: cat.is_active,
+            created_at: cat.created_at,
+            updated_at: cat.updated_at
+        };
+    },
+    deleteFoodItem: async (id: string): Promise<void> => {
+        await api.delete(`/menu/menu-items/${id}`);
+    },
+    deleteCategory: async (id: string): Promise<void> => {
+        await api.delete(`/menu/categories/${id}`);
     }
 };

@@ -15,9 +15,8 @@ export default function LandingPage() {
         </div>
         <div className="hidden md:flex items-center gap-8 font-medium text-gray-600">
           <a href="#features" className="hover:text-indigo-600 transition-colors">Features</a>
-          <a href="#pricing" className="hover:text-indigo-600 transition-colors">Pricing</a>
           <Link href="/login" className="px-6 py-2.5 bg-gray-900 text-white rounded-full hover:bg-indigo-600 transition-all shadow-xl shadow-gray-200 active:scale-95">
-            Get Started
+            Login
           </Link>
         </div>
       </nav>
@@ -39,7 +38,7 @@ export default function LandingPage() {
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link href="/login" className="w-full sm:w-auto px-10 py-5 bg-indigo-600 text-white rounded-2xl font-bold text-lg hover:bg-indigo-700 hover:shadow-2xl hover:shadow-indigo-200 transition-all active:scale-95">
-            Start Your Free Trial
+            Login
           </Link>
           <button className="w-full sm:w-auto px-10 py-5 bg-white text-gray-900 border-2 border-gray-100 rounded-2xl font-bold text-lg hover:border-indigo-100 hover:bg-gray-50 transition-all">
             Watch Demo
