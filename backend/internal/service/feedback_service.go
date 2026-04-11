@@ -22,7 +22,6 @@ func (s *FeedbackService) Create(ctx context.Context, req domain.CreateFeedbackR
 		FeedbackID: uuid.New(),
 		HotelID:    req.HotelID,
 		MenuItemID: req.MenuItemID,
-		Category:   req.Category,
 		Message:    req.Message,
 	}
 	if err := s.repo.Create(ctx, fb); err != nil {
