@@ -20,21 +20,23 @@ func NewMenuItemService(repo repository.MenuItemRepository) *MenuItemService {
 
 func (s *MenuItemService) Create(ctx context.Context, req domain.CreateMenuItemRequest) (*domain.MenuItem, error) {
 	item := &domain.MenuItem{
-		MenuItemID:    uuid.New(),
-		HotelID:       req.HotelID,
-		CategoryID:    req.CategoryID,
-		ChefID:        req.ChefID,
-		NameEN:        req.NameEN,
-		NameAM:        req.NameAM,
-		DescriptionEN: req.DescriptionEN,
-		DescriptionAM: req.DescriptionAM,
-		Price:         req.Price,
-		ImageURL:      req.ImageURL,
-		VideoURL:      req.VideoURL,
-		IsSpecial:     req.IsSpecial,
-		IsAvailable:   true,
-		ViewCount:     0,
-		Slug:          utils.GenerateSlug(req.NameEN),
+		MenuItemBase: domain.MenuItemBase{
+			MenuItemID:    uuid.New(),
+			HotelID:       req.HotelID,
+			NameEN:        req.NameEN,
+			NameAM:        req.NameAM,
+			DescriptionEN: req.DescriptionEN,
+			DescriptionAM: req.DescriptionAM,
+			Price:         req.Price,
+			ImageURL:      req.ImageURL,
+			VideoURL:      req.VideoURL,
+			IsSpecial:     req.IsSpecial,
+			IsAvailable:   true,
+			ViewCount:     0,
+			Slug:          utils.GenerateSlug(req.NameEN),
+		},
+		CategoryID: req.CategoryID,
+		ChefID:     req.ChefID,
 	}
 	if req.IsAvailable != nil {
 		item.IsAvailable = *req.IsAvailable

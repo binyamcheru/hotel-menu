@@ -150,7 +150,7 @@ func (r *menuItemRepository) GetDetailByID(ctx context.Context, id uuid.UUID) (*
 	query := `SELECT mi.menu_item_id, mi.hotel_id, mi.category_id, mi.chef_id, mi.name_en, mi.name_am,
 			  mi.description_en, mi.description_am, mi.price, mi.image_url, mi.video_url,
 			  mi.is_special, mi.is_available, mi.view_count, mi.slug, mi.created_at, mi.updated_at,
-			  c.category_id, c.name_en, c.name_am, c.is_active
+			  c.category_id, c.hotel_id, c.name_en, c.name_am, c.is_active, c.created_at, c.updated_at
 			  FROM menu_items mi
 			  JOIN categories c ON mi.category_id = c.category_id
 			  WHERE mi.menu_item_id = $1`
@@ -162,7 +162,8 @@ func (r *menuItemRepository) GetDetailByID(ctx context.Context, id uuid.UUID) (*
 		&detail.Price, &detail.ImageURL, &detail.VideoURL,
 		&detail.IsSpecial, &detail.IsAvailable, &detail.ViewCount, &detail.Slug,
 		&detail.CreatedAt, &detail.UpdatedAt,
-		&detail.Category.CategoryID, &detail.Category.NameEN, &detail.Category.NameAM, &detail.Category.IsActive,
+		&detail.Category.CategoryID, &detail.Category.HotelID, &detail.Category.NameEN, &detail.Category.NameAM, 
+		&detail.Category.IsActive, &detail.Category.CreatedAt, &detail.Category.UpdatedAt,
 	)
 	if err != nil {
 		return nil, err
