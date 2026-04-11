@@ -32,11 +32,13 @@ type MenuItem struct {
 
 type MenuItemDetail struct {
 	MenuItemBase
-	CategoryID  uuid.UUID    `json:"-"`
-	ChefID      *uuid.UUID   `json:"-"`
-	Category    *Category    `json:"category"`
-	Chef        *Chef        `json:"chef"`
-	Ingredients []Ingredient `json:"ingredients"`
+	CategoryID      uuid.UUID    `json:"-"`
+	ChefID          *uuid.UUID   `json:"-"`
+	Category        *Category    `json:"category"`
+	Chef            *Chef        `json:"chef"`
+	Ingredients     []Ingredient `json:"ingredients"`
+	Discount        *Discount    `json:"discount"`
+	DiscountedPrice *float64     `json:"discounted_price"`
 }
 
 type CreateMenuItemRequest struct {

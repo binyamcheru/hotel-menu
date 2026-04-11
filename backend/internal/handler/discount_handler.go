@@ -1,6 +1,9 @@
 package handler
 
 import (
+	"errors"
+	"net/http"
+
 	"backend/internal/domain"
 	"backend/internal/service"
 	"backend/internal/utils"
@@ -38,6 +41,13 @@ func (h *DiscountHandler) Create(c *gin.Context) {
 	}
 	discount, err := h.discountService.Create(c.Request.Context(), req)
 	if err != nil {
+		if errors.Is(err, service.ErrDiscountAlreadyExists) {
+			c.JSON(http.StatusConflict, utils.Response{
+				Status:  http.StatusConflict,
+				Message: err.Error(),
+			})
+			return
+		}
 		utils.InternalErrorResponse(c, err.Error())
 		return
 	}

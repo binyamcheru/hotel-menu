@@ -2,12 +2,15 @@ package service
 
 import (
 	"context"
+	"errors"
 
 	"backend/internal/domain"
 	"backend/internal/repository"
 
 	"github.com/google/uuid"
 )
+
+var ErrDiscountAlreadyExists = errors.New("an active discount already exists for this menu item")
 
 type DiscountService struct {
 	repo repository.DiscountRepository
@@ -18,6 +21,12 @@ func NewDiscountService(repo repository.DiscountRepository) *DiscountService {
 }
 
 func (s *DiscountService) Create(ctx context.Context, req domain.CreateDiscountRequest) (*domain.Discount, error) {
+	// Check if an active discount already exists for this menu item
+	existing, _ := s.repo.GetActiveByMenuItemID(ctx, req.MenuItemID)
+	if existing != nil {
+		return nil, ErrDiscountAlreadyExists
+	}
+
 	d := &domain.Discount{
 		DiscountID: uuid.New(),
 		MenuItemID: req.MenuItemID,

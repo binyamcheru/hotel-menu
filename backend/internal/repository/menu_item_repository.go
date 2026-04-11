@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"math"
 
 	"backend/internal/domain"
 
@@ -200,6 +201,21 @@ func (r *menuItemRepository) GetDetailByID(ctx context.Context, id uuid.UUID) (*
 				detail.Ingredients = append(detail.Ingredients, ing)
 			}
 		}
+	}
+
+	// 4. Fetch Active Discount
+	discount := &domain.Discount{}
+	discountQuery := `SELECT discount_id, menu_item_id, hotel_id, percentage, start_date, end_date, is_active, created_at
+					  FROM discounts WHERE menu_item_id = $1 AND is_active = true AND NOW() BETWEEN start_date AND end_date
+					  ORDER BY created_at DESC LIMIT 1`
+	err = r.db.QueryRow(ctx, discountQuery, id).Scan(
+		&discount.DiscountID, &discount.MenuItemID, &discount.HotelID,
+		&discount.Percentage, &discount.StartDate, &discount.EndDate, &discount.IsActive, &discount.CreatedAt,
+	)
+	if err == nil {
+		detail.Discount = discount
+		discounted := math.Round(detail.Price*(1-discount.Percentage/100)*100) / 100
+		detail.DiscountedPrice = &discounted
 	}
 
 	return detail, nil
