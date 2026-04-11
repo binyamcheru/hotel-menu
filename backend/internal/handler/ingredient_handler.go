@@ -148,21 +148,29 @@ func (h *IngredientHandler) AddToMenuItem(c *gin.Context) {
 // @Tags         Ingredients
 // @Accept       json
 // @Produce      json
-// @Param        request  body      domain.BulkAddMenuItemIngredientsRequest  true  "Menu item ID and ingredient IDs"
+// @Param        id       path      string                                    true  "Menu Item ID (UUID)"
+// @Param        request  body      domain.BulkAddMenuItemIngredientsRequest  true  "Ingredient IDs"
 // @Success      201      {object}  utils.Response{data=domain.BulkAddResult}
 // @Failure      400      {object}  utils.Response
 // @Failure      401      {object}  utils.Response
 // @Failure      404      {object}  utils.Response
 // @Failure      500      {object}  utils.Response
 // @Security     BearerAuth
-// @Router       /menu-items/ingredients/bulk [post]
+// @Router       /menu-items/{id}/ingredients/bulk [post]
 func (h *IngredientHandler) BulkAddToMenuItem(c *gin.Context) {
+	menuItemID, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		utils.BadRequestResponse(c, "Invalid menu item ID in path")
+		return
+	}
+
 	var req domain.BulkAddMenuItemIngredientsRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		utils.BadRequestResponse(c, err.Error())
 		return
 	}
-	result, err := h.ingredientService.BulkAddToMenuItem(c.Request.Context(), req.MenuItemID, req.IngredientIDs)
+
+	result, err := h.ingredientService.BulkAddToMenuItem(c.Request.Context(), menuItemID, req.IngredientIDs)
 	if err != nil {
 		handleIngredientError(c, err)
 		return

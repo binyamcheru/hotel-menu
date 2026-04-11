@@ -107,7 +107,7 @@ func (s *IngredientService) BulkAddToMenuItem(ctx context.Context, menuItemID uu
 		// 2. Verify ingredient exists
 		ingredient, err := s.ingredientRepo.GetByID(ctx, ingredientID)
 		if err != nil {
-			return nil, fmt.Errorf("ingredient %s not found", ingredientID)
+			return nil, domain.ErrIngredientNotFound
 		}
 
 		// 3. Ensure same hotel

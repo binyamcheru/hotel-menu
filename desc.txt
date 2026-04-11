@@ -1,0 +1,84 @@
+# Step-by-Step Implementation: MenuItem & Ingredient Relationship
+
+This guide explains how to implement the connection between a Menu Item and its Ingredients from both the Backend and Frontend perspectives.
+
+---
+
+## 🟢 Backend Implementation Steps
+
+### Step 1: Database & Domain Models
+Define the relationship in your domain layer. Since a Menu Item can have many ingredients, and an ingredient can belong to many items, you need a junction table.
+- **File**: `backend/internal/domain/ingredient.go`
+- **Model**: `MenuItemIngredient` struct (contains `menu_item_id` and `ingredient_id`).
+
+### Step 2: Repository Layer
+Create methods to interact with the junction table.
+- `Add(ctx, menuItemID, ingredientID)`: Inserts a single link.
+- `GetByMenuItemID(ctx, menuItemID)`: Retrieves all ingredients for a specific item.
+
+### Step 3: Service Layer (Business Logic)
+Handle the linking logic, ensuring both entities belong to the same hotel.
+- **File**: `backend/internal/service/ingredient_service.go`
+- **Method**: `BulkAddToMenuItem`
+  1. Verify the Menu Item exists.
+  2. Loop through provided `IngredientIDs`.
+  3. Verify each Ingredient exists and belongs to the same `HotelID`.
+  4. Link them using the repository.
+
+### Step 4: Handler/Controller (API Endpoints)
+Expose the functionality via REST endpoints.
+- `POST /menu-items`: Creates the item and returns the `menu_item_id`.
+- `POST /menu-items/ingredients/bulk`: Accepts `menu_item_id` and an array of `ingredient_ids`.
+
+---
+
+## 🔵 Frontend Implementation Steps
+
+### Step 1: Pre-requisite Data Fetching
+Before the user can create a menu item, they need a list of available ingredients.
+- Fetch ingredients: `GET /hotels/{id}/ingredients`.
+- Store them in a "available ingredients" state.
+
+### Step 2: UI Selection
+Provide a way for the user to select multiple ingredients.
+- Use a **Multi-select dropdown** or a **Checkbox list**.
+- Maintain a state for `selectedIngredientIds` (e.g., `['uuid-1', 'uuid-2']`).
+
+### Step 3: Form Submission Logic (The Workflow)
+When the user clicks "Create", you must execute two sequential API calls:
+
+1. **Call A (Create Item)**:
+   - Call `FoodService.addFoodItem(hotelId, foodData)`.
+   - **Important**: Catch the returned `menu_item_id` from the response.
+
+2. **Call B (Link Ingredients)**:
+   - If `selectedIngredientIds` is not empty, immediately call the bulk link endpoint:
+   - `POST /menu-items/ingredients/bulk` with `{ menu_item_id, ingredient_ids }`.
+
+### Step 4: Component Integration Example
+```typescript
+const handleSubmit = async (formData) => {
+  try {
+    // 1. Create the Menu Item first
+    const newItem = await FoodService.addFoodItem(hotelId, formData);
+    
+    // 2. Link the selected ingredients using the new ID
+    if (selectedIngredientIds.length > 0) {
+      await FoodService.linkIngredientsToMenuItem(newItem.id, selectedIngredientIds);
+    }
+    
+    // 3. Success! Redirect or show message
+    toast.success("Menu item created with ingredients!");
+  } catch (error) {
+    toast.error("Failed to create menu item");
+  }
+};
+```
+
+---
+
+## Summary of Data Flow
+1. **Frontend**: User selects ingredients -> Submits Form.
+2. **Backend**: Saves Menu Item -> Returns ID.
+3. **Frontend**: Receives ID -> Sends ID + Ingredients list to Backend.
+4. **Backend**: Saves relationships in `MenuItemIngredient` table.

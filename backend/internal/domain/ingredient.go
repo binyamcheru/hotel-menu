@@ -44,7 +44,6 @@ type AddMenuItemIngredientRequest struct {
 }
 
 type BulkAddMenuItemIngredientsRequest struct {
-	MenuItemID    uuid.UUID   `json:"menu_item_id" binding:"required"`
 	IngredientIDs []uuid.UUID `json:"ingredient_ids" binding:"required,min=1"`
 }
 
