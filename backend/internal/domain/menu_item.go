@@ -26,6 +26,13 @@ type MenuItem struct {
 	UpdatedAt     time.Time  `json:"updated_at"`
 }
 
+type MenuItemDetail struct {
+	MenuItem
+	Category    *Category    `json:"category"`
+	Chef        *Chef        `json:"chef"`
+	Ingredients []Ingredient `json:"ingredients"`
+}
+
 type CreateMenuItemRequest struct {
 	HotelID       uuid.UUID  `json:"hotel_id" binding:"required"`
 	CategoryID    uuid.UUID  `json:"category_id" binding:"required"`

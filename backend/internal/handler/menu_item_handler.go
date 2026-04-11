@@ -46,11 +46,11 @@ func (h *MenuItemHandler) Create(c *gin.Context) {
 
 // GetByID godoc
 // @Summary      Get menu item by ID
-// @Description  Get a menu item's details by its UUID
+// @Description  Get a menu item's details (category, chef, ingredients) by its UUID
 // @Tags         Menu Items
 // @Produce      json
 // @Param        id   path      string  true  "Menu Item ID (UUID)"
-// @Success      200  {object}  utils.Response{data=domain.MenuItem}
+// @Success      200  {object}  utils.Response{data=domain.MenuItemDetail}
 // @Failure      400  {object}  utils.Response
 // @Failure      404  {object}  utils.Response
 // @Router       /menu-items/{id} [get]
@@ -60,7 +60,7 @@ func (h *MenuItemHandler) GetByID(c *gin.Context) {
 		utils.BadRequestResponse(c, "Invalid menu item ID")
 		return
 	}
-	item, err := h.menuItemService.GetByID(c.Request.Context(), id)
+	item, err := h.menuItemService.GetDetailByID(c.Request.Context(), id)
 	if err != nil {
 		utils.NotFoundResponse(c, "Menu item not found")
 		return
@@ -70,16 +70,16 @@ func (h *MenuItemHandler) GetByID(c *gin.Context) {
 
 // GetBySlug godoc
 // @Summary      Get menu item by slug
-// @Description  Get a menu item's details by its URL-friendly slug
+// @Description  Get a menu item's details (category, chef, ingredients) by its URL-friendly slug
 // @Tags         Menu
 // @Produce      json
 // @Param        slug  path      string  true  "Menu item slug"
-// @Success      200   {object}  utils.Response{data=domain.MenuItem}
+// @Success      200   {object}  utils.Response{data=domain.MenuItemDetail}
 // @Failure      404   {object}  utils.Response
 // @Router       /menu/menu-items/slug/{slug} [get]
 func (h *MenuItemHandler) GetBySlug(c *gin.Context) {
 	slug := c.Param("slug")
-	item, err := h.menuItemService.GetBySlug(c.Request.Context(), slug)
+	item, err := h.menuItemService.GetDetailBySlug(c.Request.Context(), slug)
 	if err != nil {
 		utils.NotFoundResponse(c, "Menu item not found")
 		return

@@ -52,6 +52,8 @@ type MenuItemRepository interface {
 	GetBySlug(ctx context.Context, slug string) (*domain.MenuItem, error)
 	GetByHotelID(ctx context.Context, hotelID uuid.UUID) ([]domain.MenuItem, error)
 	GetByCategoryID(ctx context.Context, categoryID uuid.UUID) ([]domain.MenuItem, error)
+	GetDetailByID(ctx context.Context, id uuid.UUID) (*domain.MenuItemDetail, error)
+	GetDetailBySlug(ctx context.Context, slug string) (*domain.MenuItemDetail, error)
 	Update(ctx context.Context, item *domain.MenuItem) error
 	Delete(ctx context.Context, id uuid.UUID) error
 	IncrementViewCount(ctx context.Context, id uuid.UUID) error

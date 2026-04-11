@@ -49,8 +49,12 @@ func (s *MenuItemService) GetByID(ctx context.Context, id uuid.UUID) (*domain.Me
 	return s.repo.GetByID(ctx, id)
 }
 
-func (s *MenuItemService) GetBySlug(ctx context.Context, slug string) (*domain.MenuItem, error) {
-	return s.repo.GetBySlug(ctx, slug)
+func (s *MenuItemService) GetDetailBySlug(ctx context.Context, slug string) (*domain.MenuItemDetail, error) {
+	return s.repo.GetDetailBySlug(ctx, slug)
+}
+
+func (s *MenuItemService) GetDetailByID(ctx context.Context, id uuid.UUID) (*domain.MenuItemDetail, error) {
+	return s.repo.GetDetailByID(ctx, id)
 }
 
 func (s *MenuItemService) GetByHotelID(ctx context.Context, hotelID uuid.UUID) ([]domain.MenuItem, error) {

@@ -141,3 +141,75 @@ func (r *menuItemRepository) IncrementViewCount(ctx context.Context, id uuid.UUI
 	_, err := r.db.Exec(ctx, `UPDATE menu_items SET view_count = view_count + 1 WHERE menu_item_id=$1`, id)
 	return err
 }
+
+func (r *menuItemRepository) GetDetailByID(ctx context.Context, id uuid.UUID) (*domain.MenuItemDetail, error) {
+	detail := &domain.MenuItemDetail{}
+	detail.Category = &domain.Category{}
+
+	// 1. Fetch MenuItem and Category
+	query := `SELECT mi.menu_item_id, mi.hotel_id, mi.category_id, mi.chef_id, mi.name_en, mi.name_am,
+			  mi.description_en, mi.description_am, mi.price, mi.image_url, mi.video_url,
+			  mi.is_special, mi.is_available, mi.view_count, mi.slug, mi.created_at, mi.updated_at,
+			  c.category_id, c.name_en, c.name_am, c.is_active
+			  FROM menu_items mi
+			  JOIN categories c ON mi.category_id = c.category_id
+			  WHERE mi.menu_item_id = $1`
+	
+	var chefID *uuid.UUID
+	err := r.db.QueryRow(ctx, query, id).Scan(
+		&detail.MenuItemID, &detail.HotelID, &detail.CategoryID, &chefID,
+		&detail.NameEN, &detail.NameAM, &detail.DescriptionEN, &detail.DescriptionAM,
+		&detail.Price, &detail.ImageURL, &detail.VideoURL,
+		&detail.IsSpecial, &detail.IsAvailable, &detail.ViewCount, &detail.Slug,
+		&detail.CreatedAt, &detail.UpdatedAt,
+		&detail.Category.CategoryID, &detail.Category.NameEN, &detail.Category.NameAM, &detail.Category.IsActive,
+	)
+	if err != nil {
+		return nil, err
+	}
+	detail.ChefID = chefID
+
+	// 2. Fetch Chef if chef_id is not nil
+	if chefID != nil {
+		detail.Chef = &domain.Chef{}
+		chefQuery := `SELECT chef_id, hotel_id, name, bio_en, bio_am, image_url, created_at, updated_at
+					  FROM chefs WHERE chef_id = $1`
+		err = r.db.QueryRow(ctx, chefQuery, *chefID).Scan(
+			&detail.Chef.ChefID, &detail.Chef.HotelID, &detail.Chef.Name,
+			&detail.Chef.BioEN, &detail.Chef.BioAM, &detail.Chef.ImageURL,
+			&detail.Chef.CreatedAt, &detail.Chef.UpdatedAt,
+		)
+		if err != nil {
+			// If chef not found for some reason, we can either return error or just leave it nil
+			detail.Chef = nil
+		}
+	}
+
+	// 3. Fetch Ingredients
+	ingQuery := `SELECT i.ingredient_id, i.hotel_id, i.name, i.is_allergen, i.created_at
+				 FROM ingredients i
+				 JOIN menu_item_ingredients mii ON i.ingredient_id = mii.ingredient_id
+				 WHERE mii.menu_item_id = $1`
+	rows, err := r.db.Query(ctx, ingQuery, id)
+	if err == nil {
+		defer rows.Close()
+		for rows.Next() {
+			var ing domain.Ingredient
+			if err := rows.Scan(&ing.IngredientID, &ing.HotelID, &ing.Name, &ing.IsAllergen, &ing.CreatedAt); err == nil {
+				detail.Ingredients = append(detail.Ingredients, ing)
+			}
+		}
+	}
+
+	return detail, nil
+}
+
+func (r *menuItemRepository) GetDetailBySlug(ctx context.Context, slug string) (*domain.MenuItemDetail, error) {
+	// First get the ID by slug
+	var id uuid.UUID
+	err := r.db.QueryRow(ctx, `SELECT menu_item_id FROM menu_items WHERE slug = $1`, slug).Scan(&id)
+	if err != nil {
+		return nil, err
+	}
+	return r.GetDetailByID(ctx, id)
+}

@@ -114,6 +114,7 @@ func main() {
 		menu := api.Group("/menu")
 		menu.Use(middleware.CacheMiddleware(rdb, 5*time.Minute))
 		{
+			
 			menu.GET("/hotels/:id", hotelHandler.GetByID)
 			menu.GET("/hotels/:id/qrcode", hotelHandler.QRCode)
 			menu.GET("/hotels/:id/categories", categoryHandler.GetByHotelID)
