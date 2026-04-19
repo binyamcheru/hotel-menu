@@ -2,11 +2,13 @@ package service
 
 import (
 	"context"
+	"errors"
 
 	"backend/internal/domain"
 	"backend/internal/repository"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 type FeedbackService struct {
@@ -19,12 +21,17 @@ func NewFeedbackService(repo repository.FeedbackRepository) *FeedbackService {
 
 func (s *FeedbackService) Create(ctx context.Context, req domain.CreateFeedbackRequest) (*domain.Feedback, error) {
 	fb := &domain.Feedback{
-		FeedbackID: uuid.New(),
-		HotelID:    req.HotelID,
-		MenuItemID: req.MenuItemID,
-		Message:    req.Message,
+		FeedbackID:  uuid.New(),
+		HotelID:     req.HotelID,
+		MenuItemID:  req.MenuItemID,
+		Message:     req.Message,
+		Fingerprint: req.Fingerprint,
 	}
 	if err := s.repo.Create(ctx, fb); err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			return nil, domain.ErrAlreadySubmittedFeedback
+		}
 		return nil, err
 	}
 	return fb, nil

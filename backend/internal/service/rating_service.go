@@ -2,12 +2,13 @@ package service
 
 import (
 	"context"
+	"errors"
 
 	"backend/internal/domain"
 	"backend/internal/repository"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgconn"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 type RatingService struct {
@@ -33,19 +34,13 @@ func (s *RatingService) Create(ctx context.Context, req domain.CreateRatingReque
 
 	err := s.repo.Create(ctx, rating)
 	if err != nil {
-		if isUniqueViolation(err) {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
 			return nil, domain.ErrAlreadyRated
 		}
 		return nil, err
 	}
 	return rating, nil
-}
-
-func isUniqueViolation(err error) bool {
-	if pgErr, ok := err.(*pgconn.PgError); ok {
-		return pgErr.Code == "23505"
-	}
-	return false
 }
 
 func (s *RatingService) GetByMenuItemID(ctx context.Context, menuItemID uuid.UUID) ([]domain.Rating, error) {

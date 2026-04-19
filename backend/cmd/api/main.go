@@ -126,6 +126,7 @@ func main() {
 		// Public Menu Viewing (with Redis caching)
 		menu := api.Group("/menu")
 		menu.Use(middleware.CacheMiddleware(rdb, 5*time.Minute))
+		menu.Use(middleware.FingerprintMiddleware())
 		{
 
 			menu.GET("/hotels/:id", hotelHandler.GetByID)

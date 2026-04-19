@@ -4,6 +4,7 @@ import (
 	"backend/internal/domain"
 	"backend/internal/service"
 	"backend/internal/utils"
+	"errors"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -34,8 +35,21 @@ func (h *FeedbackHandler) Create(c *gin.Context) {
 		utils.BadRequestResponse(c, err.Error())
 		return
 	}
+
+	// Get fingerprint from middleware
+	fp, exists := c.Get("fingerprint")
+	if !exists {
+		utils.InternalErrorResponse(c, "fingerprint missing")
+		return
+	}
+	req.Fingerprint = fp.(string)
+
 	fb, err := h.feedbackService.Create(c.Request.Context(), req)
 	if err != nil {
+		if errors.Is(err, domain.ErrAlreadySubmittedFeedback) {
+			utils.BadRequestResponse(c, "You have already submitted feedback for this item")
+			return
+		}
 		utils.InternalErrorResponse(c, err.Error())
 		return
 	}
