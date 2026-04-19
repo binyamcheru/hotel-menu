@@ -23,6 +23,7 @@ func (s *HotelService) Create(ctx context.Context, req domain.CreateHotelRequest
 	hotel := &domain.Hotel{
 		HotelID:          uuid.New(),
 		Name:             req.Name,
+		Logo:             req.Logo,
 		Address:          req.Address,
 		Phone:            req.Phone,
 		LanguageSettings: req.LanguageSettings,
