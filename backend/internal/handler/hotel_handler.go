@@ -3,11 +3,12 @@ package handler
 import (
 	"fmt"
 	"log"
+	"net/http"
+
+	"backend/internal/config"
 	"backend/internal/domain"
 	"backend/internal/service"
 	"backend/internal/utils"
-	"backend/internal/config"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"

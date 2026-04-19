@@ -9,10 +9,12 @@ import (
 	"github.com/google/uuid"
 )
 
+// HotelService handles business logic for hotel operations.
 type HotelService struct {
 	repo repository.HotelRepository
 }
 
+// NewHotelService creates a new HotelService with the given repository.
 func NewHotelService(repo repository.HotelRepository) *HotelService {
 	return &HotelService{repo: repo}
 }
@@ -21,7 +23,6 @@ func (s *HotelService) Create(ctx context.Context, req domain.CreateHotelRequest
 	hotel := &domain.Hotel{
 		HotelID:          uuid.New(),
 		Name:             req.Name,
-		Logo:             req.Logo,
 		Address:          req.Address,
 		Phone:            req.Phone,
 		LanguageSettings: req.LanguageSettings,

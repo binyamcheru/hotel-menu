@@ -16,6 +16,7 @@ import (
 	"backend/internal/middleware"
 	"backend/internal/repository"
 	"backend/internal/service"
+	"backend/internal/storage/cloudinary"
 
 	_ "backend/docs" // Swagger generated docs
 
@@ -47,7 +48,17 @@ func main() {
 	// 3. Connect to Redis (graceful — returns nil if unavailable)
 	rdb := database.ConnectRedis(cfg.RedisAddr(), cfg.RedisPassword)
 
-	// 4. Initialize repositories
+	// 4. Initialize cloud storage (Cloudinary)
+	cloudStore, err := cloudinary.NewCloudinaryStorage(
+		cfg.CloudinaryCloudName,
+		cfg.CloudinaryAPIKey,
+		cfg.CloudinaryAPISecret,
+	)
+	if err != nil {
+		log.Fatalf("Failed to initialize Cloudinary: %v", err)
+	}
+
+	// 5. Initialize repositories
 	hotelRepo := repository.NewHotelRepository(db)
 	userRepo := repository.NewUserRepository(db)
 	categoryRepo := repository.NewCategoryRepository(db)
@@ -61,7 +72,7 @@ func main() {
 	menuViewRepo := repository.NewMenuViewRepository(db)
 	feedbackRepo := repository.NewFeedbackRepository(db)
 
-	// 5. Initialize services
+	// 6. Initialize services
 	authService := service.NewAuthService(userRepo, rdb, cfg.JWTSecret, cfg.AccessTokenExpiry, cfg.RefreshTokenExpiry)
 	hotelService := service.NewHotelService(hotelRepo)
 	userService := service.NewUserService(userRepo)
@@ -73,8 +84,9 @@ func main() {
 	discountService := service.NewDiscountService(discountRepo)
 	analyticsService := service.NewAnalyticsService(hotelScanRepo, menuViewRepo)
 	feedbackService := service.NewFeedbackService(feedbackRepo)
+	mediaService := service.NewMediaService(cloudStore)
 
-	// 6. Initialize handlers
+	// 7. Initialize handlers
 	authHandler := handler.NewAuthHandler(authService)
 	hotelHandler := handler.NewHotelHandler(hotelService, cfg)
 	userHandler := handler.NewUserHandler(userService)
@@ -86,8 +98,9 @@ func main() {
 	discountHandler := handler.NewDiscountHandler(discountService)
 	analyticsHandler := handler.NewAnalyticsHandler(analyticsService)
 	feedbackHandler := handler.NewFeedbackHandler(feedbackService)
+	mediaHandler := handler.NewMediaHandler(mediaService)
 
-	// 7. Setup Gin Router
+	// 8. Setup Gin Router
 	r := gin.Default()
 
 	// Global Middleware
@@ -114,7 +127,7 @@ func main() {
 		menu := api.Group("/menu")
 		menu.Use(middleware.CacheMiddleware(rdb, 5*time.Minute))
 		{
-			
+
 			menu.GET("/hotels/:id", hotelHandler.GetByID)
 			menu.GET("/hotels/:id/qrcode", hotelHandler.QRCode)
 			menu.GET("/hotels/:id/categories", categoryHandler.GetByHotelID)
@@ -143,6 +156,9 @@ func main() {
 		adminOnly := protected.Group("")
 		adminOnly.Use(middleware.RoleMiddleware("admin", "superadmin"))
 		{
+			// Media Upload (Cloudinary)
+			adminOnly.POST("/upload", mediaHandler.Upload)
+
 			// Hotel Management
 			adminOnly.GET("/hotels", hotelHandler.GetAll)
 			adminOnly.PUT("/hotels/:id", hotelHandler.Update)
@@ -198,7 +214,7 @@ func main() {
 		}
 	}
 
-	// 8. Start Server
+	// 9. Start Server
 	srv := &http.Server{
 		Addr:    ":" + cfg.Port,
 		Handler: r,

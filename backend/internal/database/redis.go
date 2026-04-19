@@ -20,10 +20,10 @@ func ConnectRedis(addr, password string) *redis.Client {
 	defer cancel()
 
 	if err := rdb.Ping(ctx).Err(); err != nil {
-		log.Printf("⚠️  Redis connection failed: %v (caching will be disabled)", err)
+		log.Printf("Redis connection failed: %v (caching will be disabled)", err)
 		return nil
 	}
 
-	log.Println("✅ Connected to Redis")
+	log.Println("Connected to Redis")
 	return rdb
 }

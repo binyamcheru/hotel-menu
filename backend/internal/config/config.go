@@ -33,6 +33,11 @@ type Config struct {
 	// JWT Token Expiry
 	AccessTokenExpiry  time.Duration
 	RefreshTokenExpiry time.Duration
+
+	// Cloudinary
+	CloudinaryCloudName string
+	CloudinaryAPIKey    string
+	CloudinaryAPISecret string
 }
 
 func Load() *Config {
@@ -63,6 +68,11 @@ func Load() *Config {
 		// JWT Token Expiry
 		AccessTokenExpiry:  time.Duration(getEnvInt("ACCESS_TOKEN_EXPIRY_MINUTES", 15)) * time.Minute,
 		RefreshTokenExpiry: time.Duration(getEnvInt("REFRESH_TOKEN_EXPIRY_DAYS", 7)) * 24 * time.Hour,
+
+		// Cloudinary
+		CloudinaryCloudName: getEnv("CLOUDINARY_CLOUD_NAME", ""),
+		CloudinaryAPIKey:    getEnv("CLOUDINARY_API_KEY", ""),
+		CloudinaryAPISecret: getEnv("CLOUDINARY_API_SECRET", ""),
 	}
 
 	return cfg
