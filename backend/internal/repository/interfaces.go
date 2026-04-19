@@ -111,5 +111,6 @@ type MenuViewRepository interface {
 type FeedbackRepository interface {
 	Create(ctx context.Context, feedback *domain.Feedback) error
 	GetByHotelID(ctx context.Context, hotelID uuid.UUID) ([]domain.Feedback, error)
+	GetByMenuItemID(ctx context.Context, menuItemID uuid.UUID) ([]domain.Feedback, error)
 	Delete(ctx context.Context, id uuid.UUID) error
 }

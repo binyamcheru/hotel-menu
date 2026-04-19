@@ -18,17 +18,17 @@ func NewRatingRepository(db *pgxpool.Pool) RatingRepository {
 }
 
 func (r *ratingRepository) Create(ctx context.Context, rating *domain.Rating) error {
-	query := `INSERT INTO ratings (rating_id, menu_item_id, hotel_id, rating, comment, language, fingerprint, created_at)
-			  VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
+	query := `INSERT INTO ratings (rating_id, menu_item_id, hotel_id, rating, fingerprint, created_at)
+			  VALUES ($1, $2, $3, $4, $5, NOW())
 			  RETURNING rating_id, created_at`
 	return r.db.QueryRow(ctx, query,
 		rating.RatingID, rating.MenuItemID, rating.HotelID,
-		rating.Rating, rating.Comment, rating.Language, rating.Fingerprint,
+		rating.Rating, rating.Fingerprint,
 	).Scan(&rating.RatingID, &rating.CreatedAt)
 }
 
 func (r *ratingRepository) GetByMenuItemID(ctx context.Context, menuItemID uuid.UUID) ([]domain.Rating, error) {
-	query := `SELECT rating_id, menu_item_id, hotel_id, rating, comment, language, created_at
+	query := `SELECT rating_id, menu_item_id, hotel_id, rating, fingerprint, created_at
 			  FROM ratings WHERE menu_item_id = $1 ORDER BY created_at DESC`
 	rows, err := r.db.Query(ctx, query, menuItemID)
 	if err != nil {
@@ -40,7 +40,7 @@ func (r *ratingRepository) GetByMenuItemID(ctx context.Context, menuItemID uuid.
 	for rows.Next() {
 		var rt domain.Rating
 		if err := rows.Scan(&rt.RatingID, &rt.MenuItemID, &rt.HotelID,
-			&rt.Rating, &rt.Comment, &rt.Language, &rt.CreatedAt); err != nil {
+			&rt.Rating, &rt.Fingerprint, &rt.CreatedAt); err != nil {
 			return nil, err
 		}
 		ratings = append(ratings, rt)
@@ -49,7 +49,7 @@ func (r *ratingRepository) GetByMenuItemID(ctx context.Context, menuItemID uuid.
 }
 
 func (r *ratingRepository) GetByHotelID(ctx context.Context, hotelID uuid.UUID) ([]domain.Rating, error) {
-	query := `SELECT rating_id, menu_item_id, hotel_id, rating, comment, language, created_at
+	query := `SELECT rating_id, menu_item_id, hotel_id, rating, fingerprint, created_at
 			  FROM ratings WHERE hotel_id = $1 ORDER BY created_at DESC`
 	rows, err := r.db.Query(ctx, query, hotelID)
 	if err != nil {
@@ -61,7 +61,7 @@ func (r *ratingRepository) GetByHotelID(ctx context.Context, hotelID uuid.UUID) 
 	for rows.Next() {
 		var rt domain.Rating
 		if err := rows.Scan(&rt.RatingID, &rt.MenuItemID, &rt.HotelID,
-			&rt.Rating, &rt.Comment, &rt.Language, &rt.CreatedAt); err != nil {
+			&rt.Rating, &rt.Fingerprint, &rt.CreatedAt); err != nil {
 			return nil, err
 		}
 		ratings = append(ratings, rt)

@@ -47,6 +47,27 @@ func (r *feedbackRepository) GetByHotelID(ctx context.Context, hotelID uuid.UUID
 	return fbs, nil
 }
 
+func (r *feedbackRepository) GetByMenuItemID(ctx context.Context, menuItemID uuid.UUID) ([]domain.Feedback, error) {
+	query := `SELECT feedback_id, hotel_id, menu_item_id, message, created_at
+			  FROM feedback WHERE menu_item_id = $1 ORDER BY created_at DESC`
+	rows, err := r.db.Query(ctx, query, menuItemID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var fbs []domain.Feedback
+	for rows.Next() {
+		var f domain.Feedback
+		if err := rows.Scan(&f.FeedbackID, &f.HotelID, &f.MenuItemID,
+			&f.Message, &f.CreatedAt); err != nil {
+			return nil, err
+		}
+		fbs = append(fbs, f)
+	}
+	return fbs, nil
+}
+
 func (r *feedbackRepository) Delete(ctx context.Context, id uuid.UUID) error {
 	_, err := r.db.Exec(ctx, `DELETE FROM feedback WHERE feedback_id=$1`, id)
 	return err

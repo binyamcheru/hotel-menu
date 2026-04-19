@@ -19,12 +19,14 @@ func NewFeedbackHandler(feedbackService *service.FeedbackService) *FeedbackHandl
 
 // Create godoc
 // @Summary      Submit feedback
+// @Description  Submit feedback for a menu item
 // @Tags         Menu
 // @Accept       json
 // @Produce      json
 // @Param        request  body      domain.CreateFeedbackRequest  true  "Feedback data"
 // @Success      201      {object}  utils.Response{data=domain.Feedback}
 // @Failure      400      {object}  utils.Response
+// @Failure      500      {object}  utils.Response
 // @Router       /menu/feedback [post]
 func (h *FeedbackHandler) Create(c *gin.Context) {
 	var req domain.CreateFeedbackRequest
@@ -40,12 +42,40 @@ func (h *FeedbackHandler) Create(c *gin.Context) {
 	utils.CreatedResponse(c, "Feedback created", fb)
 }
 
-// GetByHotelID godoc
-// @Summary      List feedback by hotel
-// @Tags         Feedback
-// @Param        id   path  string  true  "Hotel ID"
+// GetByMenuItemID godoc
+// @Summary      List feedback for a menu item
+// @Description  Get all feedback entries for a specific menu item (public)
+// @Tags         Menu
+// @Produce      json
+// @Param        id   path      string  true  "Menu Item ID (UUID)"
 // @Success      200  {object}  utils.Response{data=[]domain.Feedback}
 // @Failure      400  {object}  utils.Response
+// @Failure      500  {object}  utils.Response
+// @Router       /menu/menu-items/{id}/feedbacks [get]
+func (h *FeedbackHandler) GetByMenuItemID(c *gin.Context) {
+	menuItemID, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		utils.BadRequestResponse(c, "Invalid menu item ID")
+		return
+	}
+	fbs, err := h.feedbackService.GetByMenuItemID(c.Request.Context(), menuItemID)
+	if err != nil {
+		utils.InternalErrorResponse(c, err.Error())
+		return
+	}
+	utils.OKResponse(c, "Feedback retrieved", fbs)
+}
+
+// GetByHotelID godoc
+// @Summary      List feedback by hotel
+// @Description  Get all feedback for a specific hotel (admin/superadmin only)
+// @Tags         Feedback
+// @Produce      json
+// @Param        id   path      string  true  "Hotel ID (UUID)"
+// @Success      200  {object}  utils.Response{data=[]domain.Feedback}
+// @Failure      400  {object}  utils.Response
+// @Failure      401  {object}  utils.Response
+// @Failure      500  {object}  utils.Response
 // @Security     BearerAuth
 // @Router       /hotels/{id}/feedback [get]
 func (h *FeedbackHandler) GetByHotelID(c *gin.Context) {
@@ -64,10 +94,14 @@ func (h *FeedbackHandler) GetByHotelID(c *gin.Context) {
 
 // Delete godoc
 // @Summary      Delete feedback
+// @Description  Delete a feedback entry (admin/superadmin only)
 // @Tags         Feedback
-// @Param        id   path  string  true  "Feedback ID"
+// @Produce      json
+// @Param        id   path      string  true  "Feedback ID (UUID)"
 // @Success      200  {object}  utils.Response
 // @Failure      400  {object}  utils.Response
+// @Failure      401  {object}  utils.Response
+// @Failure      500  {object}  utils.Response
 // @Security     BearerAuth
 // @Router       /feedback/{id} [delete]
 func (h *FeedbackHandler) Delete(c *gin.Context) {

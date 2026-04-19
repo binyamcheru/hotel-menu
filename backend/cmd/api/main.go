@@ -88,11 +88,11 @@ func main() {
 
 	// 7. Initialize handlers
 	authHandler := handler.NewAuthHandler(authService)
-	hotelHandler := handler.NewHotelHandler(hotelService, cfg)
+	hotelHandler := handler.NewHotelHandler(hotelService, mediaService, cfg)
 	userHandler := handler.NewUserHandler(userService)
 	categoryHandler := handler.NewCategoryHandler(categoryService)
-	chefHandler := handler.NewChefHandler(chefService)
-	menuItemHandler := handler.NewMenuItemHandler(menuItemService)
+	chefHandler := handler.NewChefHandler(chefService, mediaService)
+	menuItemHandler := handler.NewMenuItemHandler(menuItemService, mediaService)
 	ingredientHandler := handler.NewIngredientHandler(ingredientService)
 	ratingHandler := handler.NewRatingHandler(ratingService)
 	discountHandler := handler.NewDiscountHandler(discountService)
@@ -142,6 +142,7 @@ func main() {
 			menu.POST("/feedback", feedbackHandler.Create)
 			menu.POST("/ratings", ratingHandler.Create)
 			menu.GET("/menu-items/:id", menuItemHandler.GetByID)
+			menu.GET("/menu-items/:id/feedbacks", feedbackHandler.GetByMenuItemID)
 		}
 	}
 
@@ -197,8 +198,10 @@ func main() {
 			// Analytics
 			adminOnly.GET("/hotels/:id/analytics", analyticsHandler.GetSummary)
 
+			// Rating Moderation
+			adminOnly.DELETE("/ratings/:id", ratingHandler.Delete)
+
 			// Feedback Management
-			adminOnly.GET("/hotels/:id/feedback", feedbackHandler.GetByHotelID)
 			adminOnly.DELETE("/feedback/:id", feedbackHandler.Delete)
 		}
 

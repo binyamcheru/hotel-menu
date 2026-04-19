@@ -1,0 +1,2 @@
+ALTER TABLE ratings DROP COLUMN IF EXISTS comment;
+ALTER TABLE ratings DROP COLUMN IF EXISTS language;

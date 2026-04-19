@@ -34,6 +34,10 @@ func (s *FeedbackService) GetByHotelID(ctx context.Context, hotelID uuid.UUID) (
 	return s.repo.GetByHotelID(ctx, hotelID)
 }
 
+func (s *FeedbackService) GetByMenuItemID(ctx context.Context, menuItemID uuid.UUID) ([]domain.Feedback, error) {
+	return s.repo.GetByMenuItemID(ctx, menuItemID)
+}
+
 func (s *FeedbackService) Delete(ctx context.Context, id uuid.UUID) error {
 	return s.repo.Delete(ctx, id)
 }
