@@ -19,6 +19,7 @@ export interface Manager {
     email: string;
     hotel_id: string;
     role: string;
+    hotelName?: string;
 }
 
 export interface CreateHotelRequest {

@@ -20,7 +20,6 @@ export default function HotelAdminDashboard() {
         discounts: 0,
         ingredients: 0,
         categories: 0,
-        users: 0
     });
 
     useEffect(() => {

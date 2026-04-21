@@ -18,13 +18,13 @@ export default function AnalyticsPage() {
         const fetchData = async () => {
             try {
                 const [anaRes, foodRes, hotelRes] = await Promise.all([
-                    fetchSafe(() => getHotelAnalytics(hotel)),
-                    fetchSafe(() => getMenuItemsByHotel(hotel)),
-                    fetchSafe(() => getHotelById(hotel))
+                    fetchSafe<any>(() => getHotelAnalytics(hotel)),
+                    fetchSafe<any[]>(() => getMenuItemsByHotel(hotel)),
+                    fetchSafe<any>(() => getHotelById(hotel))
                 ]);
-                setAnalytics(anaRes.data);
-                setFoods(foodRes.data);
-                setHotelData(hotelRes.data);
+                setAnalytics(anaRes.data || null);
+                setFoods(foodRes.data || []);
+                setHotelData(hotelRes.data || null);
             } catch (error) {
                 console.error('Failed to fetch analytics:', error);
             } finally {

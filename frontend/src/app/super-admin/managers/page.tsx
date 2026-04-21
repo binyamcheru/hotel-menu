@@ -54,7 +54,7 @@ export default function ManagersPage() {
                         </thead>
                         <tbody className="divide-y divide-gray-50">
                             {managers.map((manager) => (
-                                <tr key={manager.id} className="hover:bg-gray-50 transition-colors">
+                                <tr key={manager.user_id} className="hover:bg-gray-50 transition-colors">
                                     <td className="px-6 py-6">
                                         <div className="flex items-center gap-4">
                                             <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 font-black">
