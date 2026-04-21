@@ -223,24 +223,6 @@ func (r *menuItemRepository) GetDetailByID(ctx context.Context, id uuid.UUID) (*
 	_ = r.db.QueryRow(ctx, avgQuery, id).Scan(&detail.AverageRating, &detail.RatingCount)
 	detail.AverageRating = math.Round(detail.AverageRating*10) / 10
 
-	// 6. Fetch Ratings
-	ratingsQuery := `SELECT rating_id, menu_item_id, hotel_id, rating, fingerprint, created_at
-					 FROM ratings WHERE menu_item_id = $1 ORDER BY created_at DESC`
-	ratingsRows, err := r.db.Query(ctx, ratingsQuery, id)
-	if err == nil {
-		defer ratingsRows.Close()
-		for ratingsRows.Next() {
-			var rt domain.Rating
-			if err := ratingsRows.Scan(&rt.RatingID, &rt.MenuItemID, &rt.HotelID,
-				&rt.Rating, &rt.Fingerprint, &rt.CreatedAt); err == nil {
-				detail.Ratings = append(detail.Ratings, rt)
-			}
-		}
-	}
-	if detail.Ratings == nil {
-		detail.Ratings = []domain.Rating{}
-	}
-
 	// 7. Fetch Feedbacks
 	feedbackQuery := `SELECT feedback_id, hotel_id, menu_item_id, message, fingerprint, created_at
 					  FROM feedback WHERE menu_item_id = $1 ORDER BY created_at DESC`
