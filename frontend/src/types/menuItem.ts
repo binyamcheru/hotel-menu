@@ -1,3 +1,8 @@
+import { Category } from './category';
+import { Chef } from './chef';
+import { Ingredient } from './ingredient';
+import { Discount } from './discount';
+
 export interface MenuItem {
     menu_item_id: string;
     hotel_id: string;
@@ -16,6 +21,11 @@ export interface MenuItem {
     view_count: number;
     created_at: string;
     updated_at: string;
+    category?: Category;
+    chef?: Chef;
+    ingredients?: Ingredient[];
+    discount?: Discount;
+    discounted_price?: number;
 }
 
 export interface CreateMenuItemRequest {

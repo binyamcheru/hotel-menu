@@ -8,43 +8,40 @@ export function MenuItemCard({ item, onClick }: { item: FoodItem; onClick?: () =
     return (
         <div
             onClick={onClick}
-            className={`bg-white p-4 rounded-[28px] shadow-sm border border-gray-100 flex gap-4 active:scale-[0.98] transition-all cursor-pointer group ${!item.is_available ? 'opacity-60 grayscale' : ''}`}
+            className={`py-6 border-b border-gray-100 flex gap-6 active:opacity-70 transition-all cursor-pointer group ${!item.is_available ? 'opacity-40 grayscale' : ''}`}
         >
-            <div className="w-24 h-24 rounded-2xl bg-gray-50 overflow-hidden flex-shrink-0 border border-gray-50">
-                {item.image_url ? (
-                    <img src={item.image_url} alt={name} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
-                ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-200 font-black italic">
-                        {name.charAt(0)}
-                    </div>
-                )}
-            </div>
-
-            <div className="flex-1 flex flex-col justify-between py-1">
-                <div>
-                    <div className="flex justify-between items-start gap-2">
-                        <h3 className="font-black text-gray-900 leading-tight line-clamp-1">{name}</h3>
-                        <span className="font-black text-indigo-600 text-sm whitespace-nowrap">${item.price.toFixed(2)}</span>
-                    </div>
-                    <p className="text-[11px] text-gray-400 font-medium line-clamp-2 mt-1 leading-snug">
-                        {description}
-                    </p>
+            <div className="flex-1 space-y-2">
+                <div className="flex justify-between items-baseline gap-4">
+                    <h3 className="font-serif text-xl font-bold text-gray-900 leading-tight group-hover:text-indigo-900 transition-colors">
+                        {name}
+                    </h3>
+                    <div className="flex-1 border-b border-dotted border-gray-200 mb-1.5 hidden sm:block"></div>
+                    <span className="font-sans font-bold text-gray-900 whitespace-nowrap">
+                        ${item.price.toFixed(2)}
+                    </span>
                 </div>
 
-                <div className="flex justify-between items-end mt-2">
-                    <div className="flex items-center gap-2">
-                        {item.is_special && (
-                            <span className="text-[9px] font-black text-amber-500 uppercase tracking-widest bg-amber-50 px-2 py-0.5 rounded-full">Special</span>
-                        )}
-                        {item.rating && (
-                            <span className="text-[9px] font-black text-indigo-500 uppercase tracking-widest bg-indigo-50 px-2 py-0.5 rounded-full">★ {item.rating}</span>
-                        )}
-                    </div>
-                    <div className="w-8 h-8 rounded-full bg-gray-900 flex items-center justify-center text-white shadow-lg shadow-gray-200 group-hover:bg-indigo-600 transition-colors">
-                        <Plus className="w-4 h-4" />
-                    </div>
+                <p className="text-sm text-gray-500 font-medium line-clamp-2 leading-relaxed italic">
+                    {description}
+                </p>
+
+                <div className="flex items-center gap-2 pt-1">
+                    {item.is_special && (
+                        <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-[0.2em]">Chef's Selection</span>
+                    )}
+                    {item.average_rating && item.average_rating > 0 && (
+                        <span className="text-[10px] font-bold text-amber-600 flex items-center gap-1">
+                            <span className="mb-0.5">★</span> {item.average_rating.toFixed(1)}
+                        </span>
+                    )}
                 </div>
             </div>
+
+            {item.image_url && (
+                <div className="w-20 h-20 rounded-xl bg-gray-50 overflow-hidden flex-shrink-0 border border-gray-100/50">
+                    <img src={item.image_url} alt={name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                </div>
+            )}
         </div>
     );
 }

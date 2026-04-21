@@ -24,20 +24,22 @@ export default function HotelAdminDashboard() {
     });
 
     useEffect(() => {
+        let isMounted = true;
         const fetchData = async () => {
             setError(null);
             setLoading(true);
 
             try {
-                const [anaRes, chefsRes, discRes, ingRes, usersRes, catRes, hotelRes] = await Promise.all([
+                const [anaRes, chefsRes, discRes, ingRes, catRes, hotelRes] = await Promise.all([
                     fetchSafe(() => getHotelAnalytics(hotel)),
                     fetchSafe(() => getChefsByHotel(hotel)),
                     fetchSafe(() => getDiscountsByHotel(hotel)),
                     fetchSafe(() => getIngredientsByHotel(hotel)),
-                    fetchSafe(() => getUsersByHotel(hotel)),
                     fetchSafe(() => getCategoriesByHotel(hotel)),
                     fetchSafe(() => getHotelById(hotel))
                 ]);
+
+                if (!isMounted) return;
 
                 // Check for critical failures (e.g. 403 or analytics failure)
                 if (anaRes.status === 403 || hotelRes.status === 403) {
@@ -58,16 +60,17 @@ export default function HotelAdminDashboard() {
                     discounts: (discRes.data as any[])?.length || 0,
                     ingredients: (ingRes.data as any[])?.length || 0,
                     categories: (catRes.data as any[])?.length || 0,
-                    users: (usersRes.data as any[])?.length || 0
                 });
             } catch (err) {
+                if (!isMounted) return;
                 console.error('Failed to fetch dashboard data:', err);
                 setError({ message: "An unexpected error occurred while loading your dashboard.", status: 500 });
             } finally {
-                setLoading(false);
+                if (isMounted) setLoading(false);
             }
         };
         if (hotel) fetchData();
+        return () => { isMounted = false; };
     }, [hotel]);
 
     if (loading) {
@@ -95,7 +98,6 @@ export default function HotelAdminDashboard() {
         { label: 'Total Scans', value: analytics.total_scans, icon: Scan, color: 'text-blue-600', bg: 'bg-blue-50' },
         { label: 'Total Views', value: analytics.total_menu_views, icon: Utensils, color: 'text-indigo-600', bg: 'bg-indigo-50' },
         { label: 'Avg Rating', value: '4.8', icon: Star, color: 'text-amber-600', bg: 'bg-amber-50' },
-        { label: 'Team Size', value: counts.users, icon: Users, color: 'text-green-600', bg: 'bg-green-50' },
     ];
 
     const managementLinks = [
@@ -105,7 +107,6 @@ export default function HotelAdminDashboard() {
         { name: 'Discounts', href: `/${hotel}/admin/discounts`, icon: Percent, count: counts.discounts, color: 'bg-rose-500' },
         { name: 'Ingredients', href: `/${hotel}/admin/ingredients`, icon: Info, count: counts.ingredients, color: 'bg-emerald-500' },
         { name: 'Reviews', href: `/${hotel}/admin/reviews`, icon: MessageSquare, count: 'Feedback', color: 'bg-amber-500' },
-        { name: 'Users', href: `/${hotel}/admin/users`, icon: Users, count: counts.users, color: 'bg-purple-500' },
         { name: 'Settings', href: `/${hotel}/admin/settings`, icon: Settings, count: 'Menu Profile', color: 'bg-slate-700' },
     ];
 
@@ -123,13 +124,13 @@ export default function HotelAdminDashboard() {
                             <p className="text-gray-500 font-medium mt-2 text-lg">Your automated digital dining experience command center.</p>
                         </div>
                         <div className="flex gap-4">
-                            <Link href={`/${hotel}/menu`} target="_blank" className="flex items-center gap-3 bg-white text-gray-900 border-2 border-gray-50 px-8 py-4 rounded-[28px] font-black hover:bg-gray-50 hover:border-gray-100 transition-all shadow-xl shadow-gray-100 active:scale-95">
+                            <Link href={`/menu/${hotel}`} target="_blank" className="flex items-center gap-3 bg-white text-gray-900 border-2 border-gray-50 px-8 py-4 rounded-[28px] font-black hover:bg-gray-50 hover:border-gray-100 transition-all shadow-xl shadow-gray-100 active:scale-95">
                                 <Utensils className="w-5 h-5 text-indigo-600" />
                                 Live View
                             </Link>
                             <Link href={`/${hotel}/admin/qr`} className="flex items-center gap-3 bg-indigo-600 text-white px-8 py-4 rounded-[28px] font-black hover:bg-indigo-700 transition-all shadow-2xl shadow-indigo-100 active:scale-95">
                                 <Scan className="w-5 h-5" />
-                                Generate QR
+                                Get QR
                             </Link>
                         </div>
                     </div>
@@ -155,7 +156,7 @@ export default function HotelAdminDashboard() {
                 <div className="space-y-6">
                     <div className="flex items-center justify-between px-4">
                         <h2 className="text-2xl font-black text-gray-900 tracking-tight">Management Suite</h2>
-                        <span className="text-xs font-black text-indigo-600 uppercase tracking-widest bg-indigo-50 px-4 py-2 rounded-full">8 Modules Active</span>
+                        <span className="text-xs font-black text-indigo-600 uppercase tracking-widest bg-indigo-50 px-4 py-2 rounded-full">7 Modules Active</span>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         {managementLinks.map((link, i) => (
@@ -181,46 +182,6 @@ export default function HotelAdminDashboard() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mt-10">
-                    <div className="bg-slate-900 p-12 rounded-[56px] text-white flex flex-col justify-between overflow-hidden relative group">
-                        <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-600/20 blur-[120px] rounded-full -mr-48 -mt-48"></div>
-                        <div className="relative space-y-6">
-                            <div className="inline-flex items-center gap-2 bg-indigo-500/20 px-4 py-2 rounded-full text-indigo-400 text-xs font-black uppercase tracking-widest">
-                                <TrendingUp className="w-4 h-4" />
-                                Popular Items
-                            </div>
-                            <h2 className="text-4xl font-black tracking-tight leading-tight">Identify your <br /> best-sellers.</h2>
-                            <div className="space-y-4 pt-10">
-                                {analytics.popular_items?.slice(0, 3).map((item: any, i: number) => (
-                                    <div key={i} className="flex items-center justify-between p-6 bg-white/5 border border-white/5 rounded-[32px] group/item hover:bg-white/10 transition-colors">
-                                        <span className="font-black text-indigo-300">#0{i + 1} <span className="text-white ml-4">{item.name || 'Signature Dish'}</span></span>
-                                        <span className="bg-indigo-600 px-4 py-1.5 rounded-xl text-xs font-black">{item.count || 24} orders</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                        <Link href={`/${hotel}/admin/analytics`} className="relative mt-12 text-indigo-400 font-black hover:text-white transition-colors flex items-center gap-2 group/btn uppercase text-xs tracking-[0.2em]">
-                            View Detailed Reports
-                            <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-2 transition-transform" />
-                        </Link>
-                    </div>
-
-                    <div className="bg-amber-100 p-12 rounded-[56px] flex flex-col justify-between relative overflow-hidden group">
-                        <Star className="absolute top-0 right-0 w-48 h-48 text-amber-200/50 -mr-10 -mt-20 group-hover:scale-110 transition-transform duration-700" />
-                        <div className="relative space-y-4">
-                            <h2 className="text-3xl font-black text-amber-900 tracking-tight">Recent guest <br /> praises.</h2>
-                            <p className="text-amber-800/60 font-medium text-lg leading-relaxed italic">
-                                &quot;The best service and most interactive menu I have ever used in a hotel experience!&quot;
-                            </p>
-                        </div>
-                        <div className="mt-20">
-                            <Link href={`/${hotel}/admin/reviews`} className="bg-amber-900 text-white px-8 py-5 rounded-[28px] font-black inline-flex items-center gap-2 hover:bg-black transition-all shadow-xl shadow-amber-900/20">
-                                Read Guest Feedback
-                                <MessageSquare className="w-5 h-5" />
-                            </Link>
-                        </div>
-                    </div>
-                </div>
             </div>
         </ProtectedRoute>
     );

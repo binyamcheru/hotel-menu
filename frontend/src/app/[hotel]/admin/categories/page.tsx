@@ -20,6 +20,7 @@ export default function CategoriesPage() {
     const [error, setError] = useState<{ message: string; status: number } | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+    const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
     const [retryCount, setRetryCount] = useState(0);
 
     const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<CreateCategoryRequest | any>({
@@ -70,14 +71,14 @@ export default function CategoriesPage() {
         }
     };
 
-    const handleDelete = async (id: string) => {
-        if (window.confirm('Are you sure you want to delete this category? All related food items might be affected.')) {
-            try {
-                await deleteCategory(id);
-                setCategories(categories.filter(c => c.category_id !== id));
-            } catch (error) {
-                console.error('Failed to delete category:', error);
-            }
+    const handleDelete = async () => {
+        if (!categoryToDelete) return;
+        try {
+            await deleteCategory(categoryToDelete.category_id);
+            setCategories(prev => prev.filter(c => c.category_id !== categoryToDelete.category_id));
+            setCategoryToDelete(null);
+        } catch (error) {
+            console.error('Failed to delete category:', error);
         }
     };
 
@@ -157,39 +158,50 @@ export default function CategoriesPage() {
                         </div>
                     ) : (
                         categories.map((category) => (
-                            <div key={category.category_id} className="bg-white rounded-[42px] border border-gray-100 shadow-sm hover:shadow-2xl transition-all group p-8 flex items-center justify-between">
-                                <div className="flex items-center gap-6">
-                                    <div className={`w-16 h-16 ${category.is_active ? 'bg-indigo-50 text-indigo-600' : 'bg-gray-50 text-gray-300'} rounded-[24px] flex items-center justify-center transition-all group-hover:scale-110`}>
-                                        <Tag className="w-8 h-8" />
+                            <div key={category.category_id} className="bg-white rounded-[42px] border border-gray-100 shadow-sm hover:shadow-2xl hover:shadow-indigo-100/30 transition-all duration-500 group p-8 flex items-center justify-between relative overflow-hidden">
+                                <div className="flex items-center gap-6 relative z-10">
+                                    <div className={`w-20 h-20 ${category.is_active ? 'bg-indigo-50 text-indigo-600' : 'bg-gray-100 text-gray-400'} rounded-[32px] flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:rotate-6`}>
+                                        <Tag className="w-10 h-10" />
                                     </div>
-                                    <div>
+                                    <div className="space-y-1.5">
                                         <h3 className="text-2xl font-black text-gray-900 group-hover:text-indigo-600 transition-colors">{category.name_en}</h3>
-                                        <div className="flex items-center gap-2 mt-1">
+                                        <div className="flex flex-wrap items-center gap-2">
                                             {category.is_active ? (
-                                                <span className="flex items-center gap-1 text-[10px] font-black uppercase text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+                                                <span className="flex items-center gap-1.5 text-[10px] font-black uppercase text-green-600 bg-green-50 px-3 py-1 rounded-full border border-green-100/50">
                                                     <CheckCircle className="w-3 h-3" />
-                                                    Visible
+                                                    Active Segment
                                                 </span>
                                             ) : (
-                                                <span className="flex items-center gap-1 text-[10px] font-black uppercase text-red-500 bg-red-50 px-2 py-0.5 rounded-full">
+                                                <span className="flex items-center gap-1.5 text-[10px] font-black uppercase text-gray-400 bg-gray-50 px-3 py-1 rounded-full border border-gray-100">
                                                     <XCircle className="w-3 h-3" />
-                                                    Hidden
+                                                    Hidden Section
                                                 </span>
                                             )}
-                                            <span className="text-[10px] text-gray-300 font-bold uppercase tracking-widest pl-2 border-l border-gray-100">
-                                                {category.name_am || 'No Amharic name'}
-                                            </span>
+                                            {category.name_am && (
+                                                <span className="text-xs text-gray-400 font-bold bg-gray-50/50 px-3 py-1 rounded-full border border-gray-100/30">
+                                                    {category.name_am}
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
-                                <div className="flex gap-2">
-                                    <button onClick={() => openModal(category)} className="p-3 bg-gray-50 rounded-2xl text-gray-400 hover:text-indigo-600 hover:bg-white border border-transparent hover:border-indigo-50 transition-all">
+                                <div className="flex gap-3 relative z-10">
+                                    <button
+                                        onClick={() => openModal(category)}
+                                        className="p-4 bg-gray-50/50 hover:bg-white rounded-2xl text-gray-400 hover:text-indigo-600 border border-transparent hover:border-indigo-50 transition-all hover:scale-110 active:scale-95 shadow-sm hover:shadow-md"
+                                    >
                                         <Edit className="w-5 h-5" />
                                     </button>
-                                    <button onClick={() => handleDelete(category.category_id)} className="p-3 bg-gray-50 rounded-2xl text-gray-400 hover:text-red-600 hover:bg-white border border-transparent hover:border-red-50 transition-all">
+                                    <button
+                                        onClick={() => setCategoryToDelete(category)}
+                                        className="p-4 bg-gray-50/50 hover:bg-white rounded-2xl text-gray-400 hover:text-red-600 border border-transparent hover:border-red-50 transition-all hover:scale-110 active:scale-95 shadow-sm hover:shadow-md"
+                                    >
                                         <Trash2 className="w-5 h-5" />
                                     </button>
                                 </div>
+
+                                {/* Background Decorative Element */}
+                                <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-indigo-50/30 rounded-full blur-3xl group-hover:bg-indigo-100/40 transition-colors duration-500"></div>
                             </div>
                         ))
                     )}
@@ -258,6 +270,36 @@ export default function CategoriesPage() {
                                     </button>
                                 </div>
                             </form>
+                        </div>
+                    </div>
+                )}
+                {/* Delete Confirmation Modal */}
+                {categoryToDelete && (
+                    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-md animate-in fade-in duration-300">
+                        <div className="bg-white w-full max-w-md rounded-[48px] shadow-2xl overflow-hidden p-10 text-center space-y-8 animate-in zoom-in-95 duration-300">
+                            <div className="w-24 h-24 bg-red-50 rounded-[32px] flex items-center justify-center text-red-600 mx-auto shadow-sm">
+                                <AlertCircle className="w-12 h-12" />
+                            </div>
+                            <div className="space-y-3">
+                                <h3 className="text-3xl font-black text-gray-900 tracking-tight">Remove Category?</h3>
+                                <p className="text-gray-500 font-medium px-4">
+                                    Deleting <span className="text-gray-900 font-black">{categoryToDelete.name_en}</span> will affect all dishes assigned to it.
+                                </p>
+                            </div>
+                            <div className="flex flex-col gap-3 pt-4">
+                                <button
+                                    onClick={handleDelete}
+                                    className="w-full py-5 bg-red-600 text-white rounded-[28px] font-black tracking-tight hover:bg-red-700 transition-all shadow-xl shadow-red-100 active:scale-95"
+                                >
+                                    Yes, Remove Category
+                                </button>
+                                <button
+                                    onClick={() => setCategoryToDelete(null)}
+                                    className="w-full py-5 bg-white text-gray-500 border-2 border-gray-100 rounded-[28px] font-black tracking-tight hover:bg-gray-50 transition-all active:scale-95"
+                                >
+                                    Keep Category
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )}

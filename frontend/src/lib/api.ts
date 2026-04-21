@@ -8,22 +8,33 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
+    // Auto-detect FormData and remove Content-Type so the browser sets
+    // multipart/form-data with the correct boundary.
+    if (typeof window !== 'undefined' && config.data instanceof FormData) {
+        // In Axios 1.x, config.headers is an AxiosHeaders object
+        if (config.headers && typeof config.headers.set === 'function') {
+            config.headers.set('Content-Type', undefined);
+            // Some versions prefer delete
+            if (typeof config.headers.delete === 'function') {
+                config.headers.delete('Content-Type');
+            }
+        }
+    }
+
     if (typeof window !== 'undefined') {
         const token = localStorage.getItem('token');
         if (token && token !== 'undefined' && token !== 'null') {
-            config.headers = config.headers || {};
-            config.headers['Authorization'] = `Bearer ${token}`;
-
-            // Helpful debug log for the user to see in browser console
-            if (process.env.NODE_ENV === 'development') {
-                console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`, {
-                    auth: 'Bearer ' + token.substring(0, 10) + '...'
-                });
+            if (config.headers && typeof config.headers.set === 'function') {
+                config.headers.set('Authorization', `Bearer ${token}`);
+            } else {
+                config.headers = config.headers || {};
+                config.headers['Authorization'] = `Bearer ${token}`;
             }
         } else {
             console.warn('[API Request] No valid token found in localStorage');
         }
     }
+
     return config;
 }, (error) => {
     return Promise.reject(error);
@@ -100,10 +111,16 @@ api.interceptors.response.use(
 
         console.error('API Response Interceptor - Error:', {
             status: error.response?.status,
+            statusText: error.response?.statusText,
             url: error.config?.url,
             method: error.config?.method,
-            data: error.response?.data
+            data: error.response?.data,
+            message: error.message
         });
+
+        if (error.response?.data) {
+            console.error('Error Details:', error.response.data);
+        }
 
         return Promise.reject(error);
     }

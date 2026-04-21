@@ -13,10 +13,8 @@ export interface Rating {
 
 export interface SubmitRatingRequest {
     rating: number;
-    comment: string;
     menu_item_id: string;
     hotel_id: string;
-    language: string;
 }
 
 export interface Analytics {
@@ -45,6 +43,10 @@ export const ReviewService = {
             created_at: r.created_at
         };
     },
+    submitFeedback: async (data: { menu_item_id: string, hotel_id: string, message: string }): Promise<any> => {
+        const response = await api.post<GenericResponse<any>>('/menu/feedback', data);
+        return response.data.data;
+    },
     getMenuItemRatings: async (menuItemId: string): Promise<Rating[]> => {
         const response = await api.get<GenericResponse<any[]>>(`/menu/menu-items/${menuItemId}/ratings`);
         return response.data.data.map(r => ({
@@ -68,9 +70,9 @@ export const ReviewService = {
             total_scans: data.total_scans,
             total_menu_views: data.total_menu_views,
             totalScans: data.total_scans,
-            uniqueVisitors: 0, // Not provided by current backend
-            averageRating: 0, // Not provided by current backend
-            popularItems: [] // Not provided by current backend
+            uniqueVisitors: 0,
+            averageRating: 0,
+            popularItems: []
         };
     },
     recordScan: async (hotelId: string): Promise<void> => {

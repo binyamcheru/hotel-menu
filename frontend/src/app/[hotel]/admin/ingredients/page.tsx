@@ -20,6 +20,7 @@ export default function IngredientsPage() {
     const [error, setError] = useState<{ message: string; status: number } | null>(null);
     const [isIdMapped, setIsIdMapped] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [ingredientToDelete, setIngredientToDelete] = useState<Ingredient | null>(null);
     const [retryCount, setRetryCount] = useState(0);
 
     const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<CreateIngredientRequest>({
@@ -61,23 +62,22 @@ export default function IngredientsPage() {
 
     const onSubmit = async (data: CreateIngredientRequest) => {
         try {
-            await createIngredient({ ...data, hotel_id: hotel });
-            const response = await getIngredientsByHotel(hotel);
-            setIngredients(response.data.data);
+            const response = await createIngredient({ ...data, hotel_id: hotel });
+            setIngredients(prev => [...prev, response.data.data]);
             closeModal();
         } catch (error) {
             console.error('Failed to save ingredient:', error);
         }
     };
 
-    const handleDelete = async (id: string) => {
-        if (window.confirm('Are you sure you want to delete this ingredient?')) {
-            try {
-                await deleteIngredient(id);
-                setIngredients(ingredients.filter(i => i.ingredient_id !== id));
-            } catch (error) {
-                console.error('Failed to delete ingredient:', error);
-            }
+    const handleDelete = async () => {
+        if (!ingredientToDelete) return;
+        try {
+            await deleteIngredient(ingredientToDelete.ingredient_id);
+            setIngredients(ingredients.filter(i => i.ingredient_id !== ingredientToDelete.ingredient_id));
+            setIngredientToDelete(null);
+        } catch (error) {
+            console.error('Failed to delete ingredient:', error);
         }
     };
 
@@ -136,24 +136,30 @@ export default function IngredientsPage() {
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         {ingredients.map((ingredient) => (
-                            <div key={ingredient.ingredient_id} className="bg-white p-6 rounded-[32px] border border-gray-100 shadow-sm hover:shadow-xl transition-all group flex items-center justify-between">
-                                <div className="flex items-center gap-4">
-                                    <div className={`w-12 h-12 ${ingredient.is_allergen ? 'bg-amber-50 text-amber-600' : 'bg-green-50 text-green-600'} rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110`}>
-                                        {ingredient.is_allergen ? <AlertTriangle className="w-6 h-6" /> : <Leaf className="w-6 h-6" />}
+                            <div key={ingredient.ingredient_id} className="bg-white p-6 rounded-[32px] border border-gray-100 shadow-sm hover:shadow-2xl hover:shadow-indigo-100/30 transition-all duration-500 group flex items-center justify-between relative overflow-hidden">
+                                <div className="flex items-center gap-4 relative z-10">
+                                    <div className={`w-14 h-14 ${ingredient.is_allergen ? 'bg-amber-50 text-amber-600' : 'bg-green-50 text-green-600'} rounded-2xl flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:rotate-12`}>
+                                        {ingredient.is_allergen ? <AlertTriangle className="w-7 h-7" /> : <Leaf className="w-7 h-7" />}
                                     </div>
-                                    <div>
-                                        <h3 className="font-black text-gray-900 line-clamp-1">{ingredient.name}</h3>
-                                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                                            {ingredient.is_allergen ? 'Allergen' : 'Safe'}
-                                        </p>
+                                    <div className="space-y-0.5">
+                                        <h3 className="font-black text-gray-900 group-hover:text-indigo-600 transition-colors line-clamp-1 text-lg">{ingredient.name}</h3>
+                                        <div className="flex items-center gap-2">
+                                            <div className={`w-1.5 h-1.5 rounded-full ${ingredient.is_allergen ? 'bg-amber-400' : 'bg-green-400'}`}></div>
+                                            <p className="text-[10px] text-gray-400 font-black uppercase tracking-[0.15em]">
+                                                {ingredient.is_allergen ? 'Allergen Alert' : 'Standard Base'}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                                 <button
-                                    onClick={() => handleDelete(ingredient.ingredient_id)}
-                                    className="p-3 text-gray-300 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all opacity-0 group-hover:opacity-100"
+                                    onClick={() => setIngredientToDelete(ingredient)}
+                                    className="p-3.5 bg-gray-50/50 hover:bg-white rounded-2xl text-gray-400 hover:text-red-600 border border-transparent hover:border-red-50 transition-all opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 relative z-10 shadow-sm hover:shadow-md"
                                 >
                                     <Trash2 className="w-5 h-5" />
                                 </button>
+
+                                {/* Background Glow */}
+                                <div className={`absolute -bottom-4 -right-4 w-20 h-20 ${ingredient.is_allergen ? 'bg-amber-50/50' : 'bg-green-50/50'} rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700`}></div>
                             </div>
                         ))}
                     </div>
@@ -218,6 +224,36 @@ export default function IngredientsPage() {
                                     </button>
                                 </div>
                             </form>
+                        </div>
+                    </div>
+                )}
+                {/* Delete Confirmation Modal */}
+                {ingredientToDelete && (
+                    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-md animate-in fade-in duration-300">
+                        <div className="bg-white w-full max-w-md rounded-[48px] shadow-2xl overflow-hidden p-10 text-center space-y-8 animate-in zoom-in-95 duration-300">
+                            <div className="w-24 h-24 bg-red-50 rounded-[32px] flex items-center justify-center text-red-600 mx-auto shadow-sm">
+                                <AlertCircle className="w-12 h-12" />
+                            </div>
+                            <div className="space-y-3">
+                                <h3 className="text-3xl font-black text-gray-900 tracking-tight">Remove from Library?</h3>
+                                <p className="text-gray-500 font-medium px-4">
+                                    You are removing <span className="text-gray-900 font-black">{ingredientToDelete.name}</span>. This will detach it from any dishes using it.
+                                </p>
+                            </div>
+                            <div className="flex flex-col gap-3 pt-4">
+                                <button
+                                    onClick={handleDelete}
+                                    className="w-full py-5 bg-red-600 text-white rounded-[28px] font-black tracking-tight hover:bg-red-700 transition-all shadow-xl shadow-red-100 active:scale-95"
+                                >
+                                    Yes, Delete Ingredient
+                                </button>
+                                <button
+                                    onClick={() => setIngredientToDelete(null)}
+                                    className="w-full py-5 bg-white text-gray-500 border-2 border-gray-100 rounded-[28px] font-black tracking-tight hover:bg-gray-50 transition-all active:scale-95"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )}

@@ -15,12 +15,28 @@ export interface FoodItem {
     description: MultilingualText;
     price: number;
     image_url: string;
+    video_url?: string;
     is_available: boolean;
     is_special: boolean;
-    rating?: number;
     slug: string;
+    view_count?: number;
     created_at: string;
     updated_at: string;
+    category?: Category;
+    chef?: Chef;
+    ingredients?: Ingredient[];
+    average_rating?: number;
+    rating_count?: number;
+    feedbacks?: any[];
+}
+
+export interface Chef {
+    chef_id: string;
+    hotel_id: string;
+    name: string;
+    bio_en?: string;
+    bio_am?: string;
+    image_url?: string;
 }
 
 export interface Category {
@@ -57,6 +73,7 @@ export const FoodService = {
             description: { en: item.description_en, am: item.description_am },
             price: item.price,
             image_url: item.image_url,
+            video_url: item.video_url,
             is_available: item.is_available,
             is_special: item.is_special,
             slug: item.slug,
@@ -86,6 +103,7 @@ export const FoodService = {
             description: { en: item.description_en, am: item.description_am },
             price: item.price,
             image_url: item.image_url,
+            video_url: item.video_url,
             is_available: item.is_available,
             is_special: item.is_special,
             slug: item.slug,
@@ -104,11 +122,30 @@ export const FoodService = {
             description: { en: item.description_en, am: item.description_am },
             price: item.price,
             image_url: item.image_url,
+            video_url: item.video_url,
             is_available: item.is_available,
             is_special: item.is_special,
             slug: item.slug,
             created_at: item.created_at,
-            updated_at: item.updated_at
+            updated_at: item.updated_at,
+            view_count: item.view_count,
+            category: item.category ? {
+                id: item.category.category_id,
+                hotel_id: item.category.hotel_id,
+                name: { en: item.category.name_en, am: item.category.name_am },
+                is_active: item.category.is_active,
+                created_at: item.category.created_at,
+                updated_at: item.category.updated_at
+            } : undefined,
+            chef: item.chef,
+            ingredients: item.ingredients?.map((ing: any) => ({
+                id: ing.ingredient_id,
+                name: { en: ing.name, am: ing.name_am || ing.name }, // Fallback if name_am missing
+                is_allergen: ing.is_allergen
+            })),
+            average_rating: item.average_rating,
+            rating_count: item.rating_count,
+            feedbacks: item.feedbacks
         };
     },
     addFoodItem: async (hotelId: string, food: any): Promise<FoodItem> => {
