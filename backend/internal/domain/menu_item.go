@@ -39,6 +39,10 @@ type MenuItemDetail struct {
 	Ingredients     []Ingredient `json:"ingredients"`
 	Discount        *Discount    `json:"discount"`
 	DiscountedPrice *float64     `json:"discounted_price"`
+	AverageRating   float64      `json:"average_rating"`
+	RatingCount     int          `json:"rating_count"`
+	Ratings         []Rating     `json:"ratings"`
+	Feedbacks       []Feedback   `json:"feedbacks"`
 }
 
 type CreateMenuItemRequest struct {
