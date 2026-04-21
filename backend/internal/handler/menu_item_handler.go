@@ -120,20 +120,22 @@ func (h *MenuItemHandler) Create(c *gin.Context) {
 		req.IsAvailable = &b
 	}
 
-	// Handle optional image file upload
-	if imageURL, err := h.uploadFileField(c, "image", "image"); err != nil {
-		utils.InternalErrorResponse(c, "Image upload failed: "+err.Error())
-		return
-	} else if imageURL != "" {
+	// Handle optional image file upload or direct URL string
+	if imageURL, err := h.uploadFileField(c, "image", "image"); err == nil && imageURL != "" {
 		req.ImageURL = imageURL
+	} else if imageURL, err := h.uploadFileField(c, "image_url", "image"); err == nil && imageURL != "" {
+		req.ImageURL = imageURL
+	} else if v := c.PostForm("image_url"); v != "" {
+		req.ImageURL = v
 	}
 
-	// Handle optional video file upload
-	if videoURL, err := h.uploadFileField(c, "video", "video"); err != nil {
-		utils.InternalErrorResponse(c, "Video upload failed: "+err.Error())
-		return
-	} else if videoURL != "" {
+	// Handle optional video file upload or direct URL string
+	if videoURL, err := h.uploadFileField(c, "video", "video"); err == nil && videoURL != "" {
 		req.VideoURL = videoURL
+	} else if videoURL, err := h.uploadFileField(c, "video_url", "video"); err == nil && videoURL != "" {
+		req.VideoURL = videoURL
+	} else if v := c.PostForm("video_url"); v != "" {
+		req.VideoURL = v
 	}
 
 	item, err := h.menuItemService.Create(c.Request.Context(), req)
@@ -319,20 +321,22 @@ func (h *MenuItemHandler) Update(c *gin.Context) {
 		req.IsAvailable = &b
 	}
 
-	// Handle optional image file upload
-	if imageURL, err := h.uploadFileField(c, "image", "image"); err != nil {
-		utils.InternalErrorResponse(c, "Image upload failed: "+err.Error())
-		return
-	} else if imageURL != "" {
+	// Handle optional image file upload or direct URL string
+	if imageURL, err := h.uploadFileField(c, "image", "image"); err == nil && imageURL != "" {
 		req.ImageURL = &imageURL
+	} else if imageURL, err := h.uploadFileField(c, "image_url", "image"); err == nil && imageURL != "" {
+		req.ImageURL = &imageURL
+	} else if v := c.PostForm("image_url"); v != "" {
+		req.ImageURL = &v
 	}
 
-	// Handle optional video file upload
-	if videoURL, err := h.uploadFileField(c, "video", "video"); err != nil {
-		utils.InternalErrorResponse(c, "Video upload failed: "+err.Error())
-		return
-	} else if videoURL != "" {
+	// Handle optional video file upload or direct URL string
+	if videoURL, err := h.uploadFileField(c, "video", "video"); err == nil && videoURL != "" {
 		req.VideoURL = &videoURL
+	} else if videoURL, err := h.uploadFileField(c, "video_url", "video"); err == nil && videoURL != "" {
+		req.VideoURL = &videoURL
+	} else if v := c.PostForm("video_url"); v != "" {
+		req.VideoURL = &v
 	}
 
 	item, err := h.menuItemService.Update(c.Request.Context(), id, req)
